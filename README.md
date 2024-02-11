@@ -1,6 +1,6 @@
 # JKScope
 
-Java scope functions in style of Kotlin
+Java scope functions in the Kotlin style
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.plugatar.jkscope/jkscope/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.plugatar.jkscope/jkscope)
 [![Javadoc](https://javadoc.io/badge2/com.plugatar.jkscope/jkscope/javadoc.svg)](https://javadoc.io/doc/com.plugatar.jkscope/jkscope)

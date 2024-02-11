@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 /**
- * JKScope. Java scope functions in style of Kotlin.
+ * JKScope. Java scope functions in the Kotlin style.
  *
  * @see <a href="https://github.com/evpl/jkscope">GitHub repository</a>
  */
