@@ -3,7 +3,7 @@
 Java scope functions inspired by Kotlin
 
 ![Last version](https://img.shields.io/badge/last_version-2.0-blue)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.plugatar.jkscope/jkscope/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.plugatar.jkscope/jkscope)
+[![Maven Central](https://img.shields.io/maven-central/v/com.plugatar.jkscope/jkscope)](https://central.sonatype.com/artifact/com.plugatar.jkscope/jkscope)
 [![Javadoc](https://javadoc.io/badge2/com.plugatar.jkscope/jkscope/javadoc.svg)](https://javadoc.io/doc/com.plugatar.jkscope/jkscope)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
