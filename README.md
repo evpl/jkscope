@@ -26,7 +26,7 @@ Java scope functions inspired by Kotlin
 Inspired by the [Kotlin scope function](https://kotlinlang.org/docs/scope-functions.html) I want to reduce the number of
 lines of my Java code and make this code more readable.
 
-This library should have been written for this feature at a minimum 😄
+This library should have been written at least for this feature alone 😄
 
 ```
 Map<String, Integer> map = let(new HashMap<>(), it -> {
@@ -35,7 +35,7 @@ Map<String, Integer> map = let(new HashMap<>(), it -> {
 });
 ```
 
-It is also worth noting that all functions allow you not to process checked exceptions.
+It is also worth noting that all presented functions allow you to not process checked exceptions.
 
 ```
 public static void main(String[] args) {
@@ -51,7 +51,6 @@ version [here](https://github.com/evpl/jkscope/releases)):
 Maven:
 
 ```xml
-
 <dependency>
   <groupId>com.plugatar.jkscope</groupId>
   <artifactId>jkscope</artifactId>
@@ -79,7 +78,8 @@ class MyObject implements JKScope<MyObject> { }
 
 #### `let` and `also`
 
-Both methods are the same. These methods perform given function block on this object and returns this object.
+Both methods are the same and differ in the name only. Methods perform the function block on this object and return this
+object.
 
 ```
 MyDTO myDTO = new MyDTO().let(it -> {
@@ -92,8 +92,8 @@ MyResource myResource = new MyResource().also(it -> it.init());
 
 #### `takeIf` and `takeUnless`
 
-`takeIf` method performs given function block on this object and returns `Opt` monad of this object if the condition is
-met or empty `Opt` instance if the condition is not met. `takeUnless` method has reverse logic.
+`takeIf` method performs the function block on this object and returns `Opt` monad of this object if the condition is
+met, or it returns empty `Opt` instance if the condition is not met. And `takeUnless` method has reverse logic.
 
 ```
 new MyObject().takeIf(it -> it.getInt() > 10).takeUnless(it -> it.getInt() > 20).let(it -> System.out.println(it));
@@ -117,7 +117,7 @@ new MyObject().letOpt(it -> it.getInt()).takeIf(it -> it > 10).let(it -> System.
 
 ### JKScope static methods
 
-You can import the methods you need or import all to use them all.
+Import static methods you need or import them all at once.
 
 ```
 import static com.plugatar.jkscope.JKScope.*;
@@ -127,6 +127,9 @@ import static com.plugatar.jkscope.JKScope.*;
 
 `run` just runs given function block, `runCatching` runs ignore any Throwable, `runRec` runs function block allowing
 yourself to be called recursively.
+
+`run` method simply runs given function block, `runCatching` runs ignore any thrown Throwable, `runRec` runs function
+block, allowing itself to be called recursively.
 
 ```
 run(() -> {
