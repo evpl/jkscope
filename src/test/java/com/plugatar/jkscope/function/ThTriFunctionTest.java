@@ -28,44 +28,44 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 final class ThTriFunctionTest {
 
   @Test
-  void asUncheckedMethodExceptionLambdaResult() {
-    final Object functionArg1 = new Object();
-    final Object functionArg2 = new Object();
-    final Object functionArg3 = new Object();
-    final Throwable throwable = new Throwable();
-    final ThTriFunction<Object, Object, Object, Object, Throwable> originFunction = (arg1, arg2, arg3) -> {
-      throw throwable;
-    };
-
-    final ThTriFunction<Object, Object, Object, Object, RuntimeException> unchecked = originFunction.asUnchecked();
-    assertThatThrownBy(() -> unchecked.apply(functionArg1, functionArg2, functionArg3))
-      .isSameAs(throwable);
-  }
-
-  @Test
-  void asUncheckedMethodLambdaResult() {
-    final Object functionArg1 = new Object();
-    final Object functionArg2 = new Object();
-    final Object functionArg3 = new Object();
-    final AtomicReference<Object> argRef1 = new AtomicReference<>();
-    final AtomicReference<Object> argRef2 = new AtomicReference<>();
-    final AtomicReference<Object> argRef3 = new AtomicReference<>();
+  void asUncheckedMethod() {
+    final Object value1 = new Object();
+    final Object value2 = new Object();
+    final Object value3 = new Object();
+    final AtomicReference<Object> valueRef1 = new AtomicReference<>();
+    final AtomicReference<Object> valueRef2 = new AtomicReference<>();
+    final AtomicReference<Object> valueRef3 = new AtomicReference<>();
     final Object functionResult = new Object();
-    final ThTriFunction<Object, Object, Object, Object, Throwable> originFunction = (arg1, arg2, arg3) -> {
-      argRef1.set(functionArg1);
-      argRef2.set(functionArg2);
-      argRef3.set(functionArg3);
+    final ThTriFunction<Object, Object, Object, Object, Throwable> origin = (arg1, arg2, arg3) -> {
+      valueRef1.set(value1);
+      valueRef2.set(value2);
+      valueRef3.set(value3);
       return functionResult;
     };
 
-    final ThTriFunction<Object, Object, Object, Object, RuntimeException> unchecked = originFunction.asUnchecked();
-    assertThat(unchecked.apply(functionArg1, functionArg2, functionArg3))
+    final ThTriFunction<Object, Object, Object, Object, RuntimeException> unchecked = origin.asUnchecked();
+    assertThat(unchecked.apply(value1, value2, value3))
       .isSameAs(functionResult);
-    assertThat(argRef1.get())
-      .isSameAs(functionArg1);
-    assertThat(argRef2.get())
-      .isSameAs(functionArg2);
-    assertThat(argRef3.get())
-      .isSameAs(functionArg3);
+    assertThat(valueRef1.get())
+      .isSameAs(value1);
+    assertThat(valueRef2.get())
+      .isSameAs(value2);
+    assertThat(valueRef3.get())
+      .isSameAs(value3);
+  }
+
+  @Test
+  void asUncheckedMethodThrowsException() {
+    final Object value1 = new Object();
+    final Object value2 = new Object();
+    final Object value3 = new Object();
+    final Throwable throwable = new Throwable();
+    final ThTriFunction<Object, Object, Object, Object, Throwable> origin = (arg1, arg2, arg3) -> {
+      throw throwable;
+    };
+
+    final ThTriFunction<Object, Object, Object, Object, RuntimeException> unchecked = origin.asUnchecked();
+    assertThatThrownBy(() -> unchecked.apply(value1, value2, value3))
+      .isSameAs(throwable);
   }
 }

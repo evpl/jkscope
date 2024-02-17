@@ -29,23 +29,23 @@ final class ThBiConsumerTest {
 
   @Test
   void asUncheckedMethod() {
-    final Object consumerArg1 = new Object();
-    final Object consumerArg2 = new Object();
-    final AtomicReference<Object> argRef1 = new AtomicReference<>();
-    final AtomicReference<Object> argRef2 = new AtomicReference<>();
+    final Object value1 = new Object();
+    final Object value2 = new Object();
+    final AtomicReference<Object> valueRef1 = new AtomicReference<>();
+    final AtomicReference<Object> valueRef2 = new AtomicReference<>();
     final Throwable throwable = new Throwable();
-    final ThBiConsumer<Object, Object, Throwable> originConsumer = (arg1, arg2) -> {
-      argRef1.set(arg1);
-      argRef2.set(arg2);
+    final ThBiConsumer<Object, Object, Throwable> origin = (arg1, arg2) -> {
+      valueRef1.set(arg1);
+      valueRef2.set(arg2);
       throw throwable;
     };
 
-    final ThBiConsumer<Object, Object, RuntimeException> unchecked = originConsumer.asUnchecked();
-    assertThatThrownBy(() -> unchecked.accept(consumerArg1, consumerArg2))
+    final ThBiConsumer<Object, Object, RuntimeException> unchecked = origin.asUnchecked();
+    assertThatThrownBy(() -> unchecked.accept(value1, value2))
       .isSameAs(throwable);
-    assertThat(argRef1.get())
-      .isSameAs(consumerArg1);
-    assertThat(argRef2.get())
-      .isSameAs(consumerArg2);
+    assertThat(valueRef1.get())
+      .isSameAs(value1);
+    assertThat(valueRef2.get())
+      .isSameAs(value2);
   }
 }

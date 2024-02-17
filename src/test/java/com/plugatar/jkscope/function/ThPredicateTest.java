@@ -28,30 +28,30 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 final class ThPredicateTest {
 
   @Test
-  void asUncheckedMethodExceptionLambdaResult() {
-    final Object functionArg = new Object();
-    final Throwable throwable = new Throwable();
-    final ThPredicate<Object, Throwable> originFunction = arg -> { throw throwable; };
+  void asUncheckedMethod() {
+    final Object value = new Object();
+    final AtomicReference<Object> valueRef = new AtomicReference<>();
+    final boolean result = true;
+    final ThPredicate<Object, Throwable> origin = arg -> {
+      valueRef.set(arg);
+      return result;
+    };
 
-    final ThPredicate<Object, RuntimeException> unchecked = originFunction.asUnchecked();
-    assertThatThrownBy(() -> unchecked.test(functionArg))
-      .isSameAs(throwable);
+    final ThPredicate<Object, RuntimeException> unchecked = origin.asUnchecked();
+    assertThat(unchecked.test(value))
+      .isSameAs(result);
+    assertThat(valueRef.get())
+      .isSameAs(value);
   }
 
   @Test
-  void asUncheckedMethodLambdaResult() {
-    final Object functionArg = new Object();
-    final AtomicReference<Object> argRef = new AtomicReference<>();
-    final boolean predicateResult = true;
-    final ThPredicate<Object, Throwable> originFunction = arg -> {
-      argRef.set(arg);
-      return predicateResult;
-    };
+  void asUncheckedMethodThrowsException() {
+    final Object value = new Object();
+    final Throwable throwable = new Throwable();
+    final ThPredicate<Object, Throwable> origin = arg -> { throw throwable; };
 
-    final ThPredicate<Object, RuntimeException> unchecked = originFunction.asUnchecked();
-    assertThat(unchecked.test(functionArg))
-      .isSameAs(predicateResult);
-    assertThat(argRef.get())
-      .isSameAs(functionArg);
+    final ThPredicate<Object, RuntimeException> unchecked = origin.asUnchecked();
+    assertThatThrownBy(() -> unchecked.test(value))
+      .isSameAs(throwable);
   }
 }

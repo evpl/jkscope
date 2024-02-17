@@ -23,40 +23,40 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- * Tests for {@link ThBiFunction}.
+ * Tests for {@link ThDoubleObjToDoubleFunction}.
  */
-final class ThBiFunctionTest {
+final class ThDoubleObjToDoubleFunctionTest {
 
   @Test
   void asUncheckedMethod() {
-    final Object value1 = new Object();
+    final double value1 = 100.0;
     final Object value2 = new Object();
-    final AtomicReference<Object> valueRef1 = new AtomicReference<>();
-    final AtomicReference<Object> valueRef2 = new AtomicReference<>();
-    final Object result = new Object();
-    final ThBiFunction<Object, Object, Object, Throwable> origin = (arg1, arg2) -> {
-      valueRef1.set(arg1);
-      valueRef2.set(arg2);
+    final AtomicReference<Double> value1Ref = new AtomicReference();
+    final AtomicReference<Object> value2Ref = new AtomicReference<>();
+    final double result = 999.0;
+    final ThDoubleObjToDoubleFunction<Object, Throwable> origin = (arg1, arg2) -> {
+      value1Ref.set(arg1);
+      value2Ref.set(arg2);
       return result;
     };
 
-    final ThBiFunction<Object, Object, Object, RuntimeException> unchecked = origin.asUnchecked();
+    final ThDoubleObjToDoubleFunction<Object, RuntimeException> unchecked = origin.asUnchecked();
     assertThat(unchecked.apply(value1, value2))
-      .isSameAs(result);
-    assertThat(valueRef1.get())
-      .isSameAs(value1);
-    assertThat(valueRef2.get())
+      .isEqualTo(result);
+    assertThat(value1Ref.get())
+      .isEqualTo(value1);
+    assertThat(value2Ref.get())
       .isSameAs(value2);
   }
 
   @Test
   void asUncheckedMethodThrowsException() {
-    final Object value1 = new Object();
+    final double value1 = 100.0;
     final Object value2 = new Object();
     final Throwable throwable = new Throwable();
-    final ThBiFunction<Object, Object, Object, Throwable> origin = (arg1, arg2) -> { throw throwable; };
+    final ThDoubleObjToDoubleFunction<Object, Throwable> origin = (arg1, arg2) -> { throw throwable; };
 
-    final ThBiFunction<Object, Object, Object, RuntimeException> unchecked = origin.asUnchecked();
+    final ThDoubleObjToDoubleFunction<Object, RuntimeException> unchecked = origin.asUnchecked();
     assertThatThrownBy(() -> unchecked.apply(value1, value2))
       .isSameAs(throwable);
   }

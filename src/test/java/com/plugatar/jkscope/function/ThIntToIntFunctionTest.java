@@ -17,40 +17,40 @@ package com.plugatar.jkscope.function;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- * Tests for {@link ThFunction}.
+ * Tests for {@link ThIntToIntFunction}.
  */
-final class ThFunctionTest {
+final class ThIntToIntFunctionTest {
 
   @Test
   void asUncheckedMethod() {
-    final Object value = new Object();
-    final AtomicReference<Object> valueRef = new AtomicReference<>();
-    final Object result = new Object();
-    final ThFunction<Object, Object, Throwable> origin = arg -> {
+    final int value = 100;
+    final AtomicInteger valueRef = new AtomicInteger();
+    final int result = 999;
+    final ThIntToIntFunction<Throwable> origin = arg -> {
       valueRef.set(arg);
       return result;
     };
 
-    final ThFunction<Object, Object, RuntimeException> unchecked = origin.asUnchecked();
+    final ThIntToIntFunction<RuntimeException> unchecked = origin.asUnchecked();
     assertThat(unchecked.apply(value))
-      .isSameAs(result);
+      .isEqualTo(result);
     assertThat(valueRef.get())
-      .isSameAs(value);
+      .isEqualTo(value);
   }
 
   @Test
   void asUncheckedMethodThrowsException() {
-    final Object value = new Object();
+    final int value = 100;
     final Throwable throwable = new Throwable();
-    final ThFunction<Object, Object, Throwable> origin = arg -> { throw throwable; };
+    final ThIntToIntFunction<Throwable> origin = arg -> { throw throwable; };
 
-    final ThFunction<Object, Object, RuntimeException> unchecked = origin.asUnchecked();
+    final ThIntToIntFunction<RuntimeException> unchecked = origin.asUnchecked();
     assertThatThrownBy(() -> unchecked.apply(value))
       .isSameAs(throwable);
   }

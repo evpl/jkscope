@@ -29,28 +29,28 @@ final class ThTriConsumerTest {
 
   @Test
   void asUncheckedMethod() {
-    final Object consumerArg1 = new Object();
-    final Object consumerArg2 = new Object();
-    final Object consumerArg3 = new Object();
-    final AtomicReference<Object> argRef1 = new AtomicReference<>();
-    final AtomicReference<Object> argRef2 = new AtomicReference<>();
-    final AtomicReference<Object> argRef3 = new AtomicReference<>();
+    final Object value1 = new Object();
+    final Object value2 = new Object();
+    final Object value3 = new Object();
+    final AtomicReference<Object> valueRef1 = new AtomicReference<>();
+    final AtomicReference<Object> valueRef2 = new AtomicReference<>();
+    final AtomicReference<Object> valueRef3 = new AtomicReference<>();
     final Throwable throwable = new Throwable();
-    final ThTriConsumer<Object, Object, Object, Throwable> originConsumer = (arg1, arg2, arg3) -> {
-      argRef1.set(arg1);
-      argRef2.set(arg2);
-      argRef3.set(arg3);
+    final ThTriConsumer<Object, Object, Object, Throwable> origin = (arg1, arg2, arg3) -> {
+      valueRef1.set(arg1);
+      valueRef2.set(arg2);
+      valueRef3.set(arg3);
       throw throwable;
     };
 
-    final ThTriConsumer<Object, Object, Object, RuntimeException> unchecked = originConsumer.asUnchecked();
-    assertThatThrownBy(() -> unchecked.accept(consumerArg1, consumerArg2, consumerArg3))
+    final ThTriConsumer<Object, Object, Object, RuntimeException> unchecked = origin.asUnchecked();
+    assertThatThrownBy(() -> unchecked.accept(value1, value2, value3))
       .isSameAs(throwable);
-    assertThat(argRef1.get())
-      .isSameAs(consumerArg1);
-    assertThat(argRef2.get())
-      .isSameAs(consumerArg2);
-    assertThat(argRef3.get())
-      .isSameAs(consumerArg3);
+    assertThat(valueRef1.get())
+      .isSameAs(value1);
+    assertThat(valueRef2.get())
+      .isSameAs(value2);
+    assertThat(valueRef3.get())
+      .isSameAs(value3);
   }
 }

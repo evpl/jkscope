@@ -13,35 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.plugatar.jkscope;
+package com.plugatar.jkscope.function;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- * Tests for {@link JKScopeOpt}.
+ * Tests for {@link ThLongConsumer}.
  */
-final class JKScopeOptTest {
+final class ThLongConsumerTest {
 
   @Test
-  void asOptionalMethodForEmpty() {
-    final JKScopeOpt<Object> jkScopeOpt = JKScopeOpt.empty();
+  void asUncheckedMethod() {
+    final long value = 100L;
+    final AtomicLong valueRef = new AtomicLong();
+    final Throwable throwable = new Throwable();
+    final ThLongConsumer<Throwable> origin = arg -> {
+      valueRef.set(arg);
+      throw throwable;
+    };
 
-    assertThat(jkScopeOpt.asOptional())
-      .isEmpty();
-  }
-
-  @Test
-  void asOptionalMethodForNonEmpty() {
-    final Object value = new Object();
-    final JKScopeOpt<Object> jkScopeOpt = JKScopeOpt.of(value);
-
-    final Optional<Object> optional = jkScopeOpt.asOptional();
-    assertThat(optional)
-      .isNotEmpty()
-      .containsSame(value);
+    final ThLongConsumer<RuntimeException> unchecked = origin.asUnchecked();
+    assertThatThrownBy(() -> unchecked.accept(value))
+      .isSameAs(throwable);
+    assertThat(valueRef.get())
+      .isEqualTo(value);
   }
 }

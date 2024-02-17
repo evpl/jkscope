@@ -17,40 +17,40 @@ package com.plugatar.jkscope.function;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- * Tests for {@link ThFunction}.
+ * Tests for {@link ThLongToLongFunction}.
  */
-final class ThFunctionTest {
+final class ThLongToLongFunctionTest {
 
   @Test
   void asUncheckedMethod() {
-    final Object value = new Object();
-    final AtomicReference<Object> valueRef = new AtomicReference<>();
-    final Object result = new Object();
-    final ThFunction<Object, Object, Throwable> origin = arg -> {
+    final long value = 100;
+    final AtomicLong valueRef = new AtomicLong();
+    final long result = 999;
+    final ThLongToLongFunction<Throwable> origin = arg -> {
       valueRef.set(arg);
       return result;
     };
 
-    final ThFunction<Object, Object, RuntimeException> unchecked = origin.asUnchecked();
+    final ThLongToLongFunction<RuntimeException> unchecked = origin.asUnchecked();
     assertThat(unchecked.apply(value))
-      .isSameAs(result);
+      .isEqualTo(result);
     assertThat(valueRef.get())
-      .isSameAs(value);
+      .isEqualTo(value);
   }
 
   @Test
   void asUncheckedMethodThrowsException() {
-    final Object value = new Object();
+    final long value = 100;
     final Throwable throwable = new Throwable();
-    final ThFunction<Object, Object, Throwable> origin = arg -> { throw throwable; };
+    final ThLongToLongFunction<Throwable> origin = arg -> { throw throwable; };
 
-    final ThFunction<Object, Object, RuntimeException> unchecked = origin.asUnchecked();
+    final ThLongToLongFunction<RuntimeException> unchecked = origin.asUnchecked();
     assertThatThrownBy(() -> unchecked.apply(value))
       .isSameAs(throwable);
   }

@@ -26,22 +26,22 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 final class ThSupplierTest {
 
   @Test
-  void asUncheckedMethodExceptionLambdaResult() {
-    final Throwable throwable = new Throwable();
-    final ThSupplier<Object, Throwable> originSupplier = () -> { throw throwable; };
+  void asUncheckedMethod() {
+    final Object result = new Object();
+    final ThSupplier<Object, Throwable> origin = () -> result;
 
-    final ThSupplier<Object, RuntimeException> unchecked = originSupplier.asUnchecked();
-    assertThatThrownBy(() -> unchecked.get())
-      .isSameAs(throwable);
+    final ThSupplier<Object, RuntimeException> unchecked = origin.asUnchecked();
+    assertThat(unchecked.get())
+      .isSameAs(result);
   }
 
   @Test
-  void asUncheckedMethodLambdaResult() {
-    final Object supplierResult = new Object();
-    final ThSupplier<Object, Throwable> originSupplier = () -> supplierResult;
+  void asUncheckedMethodThrowsException() {
+    final Throwable throwable = new Throwable();
+    final ThSupplier<Object, Throwable> origin = () -> { throw throwable; };
 
-    final ThSupplier<Object, RuntimeException> unchecked = originSupplier.asUnchecked();
-    assertThat(unchecked.get())
-      .isSameAs(supplierResult);
+    final ThSupplier<Object, RuntimeException> unchecked = origin.asUnchecked();
+    assertThatThrownBy(() -> unchecked.get())
+      .isSameAs(throwable);
   }
 }

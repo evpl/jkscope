@@ -1,6 +1,6 @@
 # JKScope
 
-Java scope functions in the Kotlin style
+Java scope functions inspired by Kotlin
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.plugatar.jkscope/jkscope/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.plugatar.jkscope/jkscope)
 [![Javadoc](https://javadoc.io/badge2/com.plugatar.jkscope/jkscope/javadoc.svg)](https://javadoc.io/doc/com.plugatar.jkscope/jkscope)
@@ -8,12 +8,45 @@ Java scope functions in the Kotlin style
 
 ## Table of Contents
 
-* [How to use](#How-to-use)
-* [Example](#Examples)
+* [Motivation](#motivation)
+* [How to use](#how-to-use)
+* [Docs](#docs)
+  * [JKScope interface methods](#jkscope-interface-methods)
+    * [`let` and `also`](#let-and-also)
+    * [`takeIf` and `takeUnless`](#takeif-and-takeunless)
+    * [`letOut`](#letout)
+    * [`letOpt`](#letopt)
+  * [JKScope static methods](#jkscope-static-methods)
+    * [`run`, `runCatching` and `runRec`](#run-runcatching-and-runrec)
+    * [`with`, `withInt`, `withLong` and `withDouble`](#with-withint-withlong-and-withdouble)
+    * [`let` variations](#let-variations)
+
+## Motivation
+
+Inspired by the [Kotlin scope function](https://kotlinlang.org/docs/scope-functions.html) I want to reduce the number of
+lines of my Java code and make this code more readable.
+
+This library should have been written for this feature at a minimum 😄
+
+```
+Map<String, Integer> map = let(new HashMap<>(), it -> {
+  it.put("val1", 1);
+  it.put("val2", 2);
+});
+```
+
+It is also worth noting that all functions allow you not to process checked exceptions.
+
+```
+public static void main(String[] args) {
+  URI uri = let(() -> new URI("abc"));
+}
+```
 
 ## How to use
 
-Requires Java 8+ version.
+Java version required: 1.8+. The library has no dependencies. All you need is this (get the latest
+version [here](https://github.com/evpl/jkscope/releases)):
 
 Maven:
 
@@ -34,107 +67,141 @@ dependencies {
 }
 ```
 
-## Examples
+## Docs
 
-### Static methods
+### JKScope interface methods
 
-```java
-import static com.plugatar.jkscope.JKScope.let;
-import static com.plugatar.jkscope.JKScope.run;
-import static com.plugatar.jkscope.JKScope.with;
-import static com.plugatar.jkscope.JKScope.withNonNull;
+You need to implement `JKScope` interface to use these methods.
 
-class ExampleTest {
-
-  @Test
-  void letMethod() {
-    let(() -> {
-      System.out.println("ok");
-    });
-  }
-
-  @Test
-  void runMethod() {
-    int result = run(() -> {
-      System.out.println("ok");
-      return 12;
-    });
-  }
-
-  @Test
-  void withMethod() {
-    String value1 = "a";
-    String value2 = "b";
-    String value3 = "c";
-
-    with(value2, it -> {
-      System.out.println(it);
-    });
-
-    String result = with(value1, value2, (it1, it2) -> it1 + it2);
-
-    with(value1, value2, value3, (it1, it2, it3) -> {
-      System.out.println(it1 + it2 + it3);
-    });
-
-    with(value2).takeNonNull().takeIf(it -> it.length() > 3).let(it -> System.out.println(it));
-  }
-
-  @Test
-  void withNonNullMethod() {
-    String value1 = "a";
-    String value2 = null;
-    String value3 = "c";
-
-    withNonNull(value2, it -> {
-      System.out.println(it);
-    });
-
-    withNonNull(value1, value2, (it1, it2) -> it1 + it2).let(it -> System.out.println(it));
-
-    withNonNull(value1, value2, value3, (it1, it2, it3) -> {
-      System.out.println(it1 + it2 + it3);
-    });
-
-    withNonNull(value2).takeNonNull().takeUnless(it -> it.length() < 3).let(it -> System.out.println(it));
-  }
-}
+```
+class MyObject implements JKScope<MyObject> { }
 ```
 
-### Instance methods
+#### `let` and `also`
 
-```java
-public class MyClass implements JKScope<MyClass> {
+Both methods are the same. These methods perform given function block on this object and returns this object.
 
-  public MyClass() {
+```
+MyDTO myDTO = new MyDTO().let(it -> {
+  it.setProperty("value");
+  it.setAnother("another value");
+});
+
+MyResource myResource = new MyResource().also(it -> it.init());
+```
+
+#### `takeIf` and `takeUnless`
+
+`takeIf` method performs given function block on this object and returns `Opt` monad of this object if the condition is
+met or empty `Opt` instance if the condition is not met. `takeUnless` method has reverse logic.
+
+```
+new MyObject().takeIf(it -> it.getInt() > 10).takeUnless(it -> it.getInt() > 20).let(it -> System.out.println(it));
+```
+
+#### `letOut`
+
+`takeIf` method performs given function block on this object and returns result.
+
+```
+Integer value = new MyObject().letOut(it -> it.getInt());
+```
+
+#### `letOpt`
+
+`takeIf` method performs given function block on this object and returns `Opt` monad of result.
+
+```
+new MyObject().letOpt(it -> it.getInt()).takeIf(it -> it > 10).let(it -> System.out.println(it));
+```
+
+### JKScope static methods
+
+You can import the methods you need or import all to use them all.
+
+```
+import static com.plugatar.jkscope.JKScope.*;
+```
+
+#### `run`, `runCatching` and `runRec`
+
+`run` just runs given function block, `runCatching` runs ignore any Throwable, `runRec` runs function block allowing
+yourself to be called recursively.
+
+```
+run(() -> {
+  System.out.println("Hi");
+});
+
+runCatching(() -> {
+  System.out.println("Hi");
+});
+
+runRec(func -> {
+  if (new Random().nextInt(0, 100) == 50) {
+    func.run();
   }
+});
+```
 
-  public void method1() {
+#### `with`, `withInt`, `withLong` and `withDouble`
+
+These methods perform given function block on given values.
+
+```
+with(value, it -> {
+  System.out.println(value);
+});
+
+with(value1, value2, (v1, v2) -> {
+  System.out.println(v1);
+  System.out.println(v2);
+});
+```
+
+#### `let` variations
+
+`let` returns `Opt` instance of given value, `letNonNull` returns `Opt` instance of given value of given value or
+empty `Opt` instance if given value is null.
+
+```
+let(value).takeNonNull().takeUnless(it -> it.isEmpty()).takeIf(it -> it.length() < 100).let(it -> System.out.println(it));
+
+letNonNull(value).takeUnless(it -> it.isEmpty()).takeIf(it -> it.length() < 100).let(it -> System.out.println(it));
+```
+
+`let`, `letInt`, `letLong` and `letDouble` returns result of function block.
+
+```
+String value = let(() -> {
+  //...
+  return "val";
+});
+```
+
+`let`, `letInt`, `letLong` and `letDouble` methods can also receive a value, process it using a function block, and
+return that value.
+
+```
+String value = let("val", it -> {
+  System.out.println(it);
+});
+```
+
+`letRec`, `letIntRec`, `letLongRec` and `letDoubleRec` accept initial value and allow you to process it recursively
+returning the result.
+
+```
+int value = letIntRec(10, (n, func) -> {
+  if (n < 2) {
+    return n;
   }
+  return func.apply(n - 1) + func.apply(n - 2);
+});
+```
 
-  public String method2() {
-    return "abc";
-  }
-}
+`letWith` methods accept values and returning the result of function block.
 
-class ExampleTest {
-
-  @Test
-  void instance() {
-    MyClass myClass = new MyClass().also(it -> it.method1());
-
-    myClass.apply(it -> it.method1()).apply(it -> it.method2());
-
-    myClass.let(it -> {
-      it.method1();
-      it.method2();
-    });
-
-    String result = myClass.run(it -> it.method2());
-
-    myClass.takeIf(it -> it.method2().length() > 3).let(it -> {
-      System.out.println("ok");
-    });
-  }
-}
+```
+int value = letWith("42", it -> Integer.valueOf(it));
 ```

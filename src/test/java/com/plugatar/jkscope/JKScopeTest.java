@@ -18,7 +18,20 @@ package com.plugatar.jkscope;
 import com.plugatar.jkscope.function.ThBiConsumer;
 import com.plugatar.jkscope.function.ThBiFunction;
 import com.plugatar.jkscope.function.ThConsumer;
+import com.plugatar.jkscope.function.ThDoubleConsumer;
+import com.plugatar.jkscope.function.ThDoubleObjToDoubleFunction;
+import com.plugatar.jkscope.function.ThDoubleSupplier;
+import com.plugatar.jkscope.function.ThDoubleToDoubleFunction;
 import com.plugatar.jkscope.function.ThFunction;
+import com.plugatar.jkscope.function.ThIntConsumer;
+import com.plugatar.jkscope.function.ThIntObjToIntFunction;
+import com.plugatar.jkscope.function.ThIntSupplier;
+import com.plugatar.jkscope.function.ThIntToIntFunction;
+import com.plugatar.jkscope.function.ThLongConsumer;
+import com.plugatar.jkscope.function.ThLongObjToLongFunction;
+import com.plugatar.jkscope.function.ThLongSupplier;
+import com.plugatar.jkscope.function.ThLongToLongFunction;
+import com.plugatar.jkscope.function.ThPredicate;
 import com.plugatar.jkscope.function.ThRunnable;
 import com.plugatar.jkscope.function.ThSupplier;
 import com.plugatar.jkscope.function.ThTriConsumer;
@@ -26,9 +39,10 @@ import com.plugatar.jkscope.function.ThTriFunction;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static com.plugatar.jkscope.JKScope.withNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -41,90 +55,87 @@ final class JKScopeTest {
 
   @Test
   void letInstanceMethodThrowsNPEForNullArg() {
-    final JKScope<?> jkScope = new JKScopeImpl();
+    final JKScope<?> jkScope = new Impl();
     final ThConsumer<Object, Throwable> block = null;
 
     assertThatThrownBy(() -> jkScope.let(block))
-      .isInstanceOf(NullPointerException.class);
-  }
-
-  @Test
-  void runInstanceMethodThrowsNPEForNullArg() {
-    final JKScope<?> jkScope = new JKScopeImpl();
-    final ThFunction<Object, Object, Throwable> block = null;
-
-    assertThatThrownBy(() -> jkScope.run(block))
       .isInstanceOf(NullPointerException.class);
   }
 
   @Test
   void alsoInstanceMethodThrowsNPEForNullArg() {
-    final JKScope<?> jkScope = new JKScopeImpl();
+    final JKScope<?> jkScope = new Impl();
     final ThConsumer<Object, Throwable> block = null;
 
     assertThatThrownBy(() -> jkScope.also(block))
       .isInstanceOf(NullPointerException.class);
   }
 
+  @Test
+  void letOutInstanceMethodThrowsNPEForNullArg() {
+    final JKScope<?> jkScope = new Impl();
+    final ThFunction<Object, Object, Throwable> block = null;
+
+    assertThatThrownBy(() -> jkScope.letOut(block))
+      .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void letOptInstanceMethodThrowsNPEForNullArg() {
+    final JKScope<?> jkScope = new Impl();
+    final ThFunction<Object, Object, Throwable> block = null;
+
+    assertThatThrownBy(() -> jkScope.letOpt(block))
+      .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void takeIfInstanceMethodThrowsNPEForNullArg() {
+    final JKScope<?> jkScope = new Impl();
+    final ThPredicate<Object, Throwable> block = null;
+
+    assertThatThrownBy(() -> jkScope.takeIf(block))
+      .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void takeUnlessInstanceMethodThrowsNPEForNullArg() {
+    final JKScope<?> jkScope = new Impl();
+    final ThPredicate<Object, Throwable> block = null;
+
+    assertThatThrownBy(() -> jkScope.takeUnless(block))
+      .isInstanceOf(NullPointerException.class);
+  }
+
   //endregion
 
-  //region logic check for instance methods
+  //region Logic check for instance methods
 
   @Test
   void letInstanceMethod() {
-    final JKScope<?> jkScope = new JKScopeImpl();
+    final JKScope<?> jkScope = new Impl();
     final AtomicReference<Object> thisRef = new AtomicReference<>();
-    final Throwable throwable = new Throwable();
-    final ThConsumer<Object, Throwable> block = arg -> {
-      thisRef.set(arg);
-      throw throwable;
-    };
+    final ThConsumer<Object, Throwable> block = arg -> thisRef.set(arg);
 
-    assertThatThrownBy(() -> jkScope.let(block))
-      .isSameAs(throwable);
+    assertThat(jkScope.let(block))
+      .isSameAs(jkScope);
     assertThat(thisRef.get())
       .isSameAs(jkScope);
   }
 
   @Test
-  void runInstanceMethodException() {
-    final JKScope<?> jkScope = new JKScopeImpl();
-    final Throwable throwable = new Throwable();
-    final ThFunction<Object, Object, Throwable> block = arg -> { throw throwable; };
-
-    assertThatThrownBy(() -> jkScope.run(block))
-      .isSameAs(throwable);
-  }
-
-  @Test
-  void runInstanceMethodResult() {
-    final JKScope<?> jkScope = new JKScopeImpl();
-    final AtomicReference<Object> thisRef = new AtomicReference<>();
-    final Object blockResult = new Object();
-    final ThFunction<Object, Object, Throwable> block = arg -> {
-      thisRef.set(arg);
-      return blockResult;
-    };
-
-    assertThat(jkScope.run(block))
-      .isSameAs(blockResult);
-    assertThat(thisRef.get())
-      .isSameAs(jkScope);
-  }
-
-  @Test
-  void alsoInstanceMethodException() {
-    final JKScope<?> jkScope = new JKScopeImpl();
+  void letInstanceMethodThrowsException() {
+    final JKScope<?> jkScope = new Impl();
     final Throwable throwable = new Throwable();
     final ThConsumer<Object, Throwable> block = arg -> { throw throwable; };
 
-    assertThatThrownBy(() -> jkScope.also(block))
+    assertThatThrownBy(() -> jkScope.let(block))
       .isSameAs(throwable);
   }
 
   @Test
-  void alsoInstanceMethodResult() {
-    final JKScope<?> jkScope = new JKScopeImpl();
+  void alsoInstanceMethod() {
+    final JKScope<?> jkScope = new Impl();
     final AtomicReference<Object> thisRef = new AtomicReference<>();
     final ThConsumer<Object, Throwable> block = arg -> thisRef.set(arg);
 
@@ -135,25 +146,121 @@ final class JKScopeTest {
   }
 
   @Test
-  void applyInstanceMethodException() {
-    final JKScope<?> jkScope = new JKScopeImpl();
+  void alsoInstanceMethodThrowsException() {
+    final JKScope<?> jkScope = new Impl();
     final Throwable throwable = new Throwable();
     final ThConsumer<Object, Throwable> block = arg -> { throw throwable; };
 
-    assertThatThrownBy(() -> jkScope.apply(block))
+    assertThatThrownBy(() -> jkScope.also(block))
       .isSameAs(throwable);
   }
 
   @Test
-  void applyInstanceMethodResult() {
-    final JKScope<?> jkScope = new JKScopeImpl();
+  void letOutInstanceMethod() {
+    final JKScope<?> jkScope = new Impl();
     final AtomicReference<Object> thisRef = new AtomicReference<>();
-    final ThConsumer<Object, Throwable> block = arg -> thisRef.set(arg);
+    final Object result = new Object();
+    final ThFunction<Object, Object, Throwable> block = arg -> {
+      thisRef.set(arg);
+      return result;
+    };
 
-    assertThat(jkScope.apply(block))
+    assertThat(jkScope.letOut(block))
+      .isSameAs(result);
+    assertThat(thisRef.get())
+      .isSameAs(jkScope);
+  }
+
+  @Test
+  void letOutInstanceMethodThrowsException() {
+    final JKScope<?> jkScope = new Impl();
+    final Throwable throwable = new Throwable();
+    final ThFunction<Object, Object, Throwable> block = arg -> { throw throwable; };
+
+    assertThatThrownBy(() -> jkScope.letOut(block))
+      .isSameAs(throwable);
+  }
+
+  @Test
+  void letOptInstanceMethod() {
+    final JKScope<?> jkScope = new Impl();
+    final AtomicReference<Object> thisRef = new AtomicReference<>();
+    final Object result = new Object();
+    final ThFunction<Object, Object, Throwable> block = arg -> {
+      thisRef.set(arg);
+      return result;
+    };
+
+    assertThat(jkScope.letOpt(block).get())
+      .isSameAs(result);
+    assertThat(thisRef.get())
+      .isSameAs(jkScope);
+  }
+
+  @Test
+  void letOptInstanceMethodThrowsException() {
+    final JKScope<?> jkScope = new Impl();
+    final Throwable throwable = new Throwable();
+    final ThFunction<Object, Object, Throwable> block = arg -> { throw throwable; };
+
+    assertThatThrownBy(() -> jkScope.letOpt(block))
+      .isSameAs(throwable);
+  }
+
+  @Test
+  void takeIfInstanceMethod() {
+    final JKScope<?> jkScope = new Impl();
+    final AtomicReference<Object> thisRef = new AtomicReference<>();
+    final ThPredicate<Object, Throwable> block1 = arg -> {
+      thisRef.set(arg);
+      return true;
+    };
+    final ThPredicate<Object, Throwable> block2 = arg -> false;
+
+    assertThat(jkScope.takeIf(block1).get())
       .isSameAs(jkScope);
     assertThat(thisRef.get())
       .isSameAs(jkScope);
+    assertThat(jkScope.takeIf(block2).isEmpty())
+      .isTrue();
+  }
+
+  @Test
+  void takeIfInstanceMethodThrowsException() {
+    final JKScope<?> jkScope = new Impl();
+    final Throwable throwable = new Throwable();
+    final ThPredicate<Object, Throwable> block = arg -> { throw throwable; };
+
+    assertThatThrownBy(() -> jkScope.takeIf(block))
+      .isSameAs(throwable);
+  }
+
+  @Test
+  void takeUnlessInstanceMethod() {
+    final JKScope<?> jkScope = new Impl();
+    final AtomicReference<Object> thisRef = new AtomicReference<>();
+    final ThPredicate<Object, Throwable> block1 = arg -> {
+      thisRef.set(arg);
+      return false;
+    };
+    final ThPredicate<Object, Throwable> block2 = arg -> true;
+
+    assertThat(jkScope.takeUnless(block1).get())
+      .isSameAs(jkScope);
+    assertThat(thisRef.get())
+      .isSameAs(jkScope);
+    assertThat(jkScope.takeUnless(block2).isEmpty())
+      .isTrue();
+  }
+
+  @Test
+  void takeUnlessInstanceMethodThrowsException() {
+    final JKScope<?> jkScope = new Impl();
+    final Throwable throwable = new Throwable();
+    final ThPredicate<Object, Throwable> block = arg -> { throw throwable; };
+
+    assertThatThrownBy(() -> jkScope.takeUnless(block))
+      .isSameAs(throwable);
   }
 
   //endregion
@@ -161,189 +268,862 @@ final class JKScopeTest {
   //region NPE check for static methods
 
   @Test
-  void applyInstanceMethodThrowsNPEForNullArg() {
-    final JKScope<?> jkScope = new JKScopeImpl();
-    final ThConsumer<Object, Throwable> block = null;
-
-    assertThatThrownBy(() -> jkScope.apply(block))
-      .isInstanceOf(NullPointerException.class);
-  }
-
-  @Test
-  void letStaticMethodThrowsNPEForNullArg() {
-    final ThRunnable<Throwable> block = null;
-
-    assertThatThrownBy(() -> JKScope.let(block))
-      .isInstanceOf(NullPointerException.class);
-  }
-
-  @Test
   void runStaticMethodThrowsNPEForNullArg() {
-    final ThSupplier<Object, Throwable> block = null;
+    final ThRunnable<Throwable> block = null;
 
     assertThatThrownBy(() -> JKScope.run(block))
       .isInstanceOf(NullPointerException.class);
   }
 
   @Test
-  void withThConsumerStaticMethodThrowsNPEForNullArg() {
+  void runCatchingStaticMethodThrowsNPEForNullArg() {
+    final ThRunnable<Throwable> block = null;
+
+    assertThatThrownBy(() -> JKScope.runCatching(block))
+      .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void runRecStaticMethodThrowsNPEForNullArg() {
+    final ThConsumer<ThRunnable<Throwable>, Throwable> block = null;
+
+    assertThatThrownBy(() -> JKScope.runRec(block))
+      .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void withStaticMethodThrowsNPEForNullArg() {
+    final Object value = new Object();
     final ThConsumer<Object, Throwable> block = null;
-    final Object arg = new Object();
 
-    assertThatThrownBy(() -> JKScope.with(arg, block))
+    assertThatThrownBy(() -> JKScope.with(value, block))
       .isInstanceOf(NullPointerException.class);
   }
 
   @Test
-  void withThBiConsumerStaticMethodThrowsNPEForNullArg() {
+  void withIntStaticMethodThrowsNPEForNullArg() {
+    final int value = 0;
+    final ThIntConsumer<Throwable> block = null;
+
+    assertThatThrownBy(() -> JKScope.withInt(value, block))
+      .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void withLongStaticMethodThrowsNPEForNullArg() {
+    final long value = 0L;
+    final ThLongConsumer<Throwable> block = null;
+
+    assertThatThrownBy(() -> JKScope.withLong(value, block))
+      .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void withDoubleStaticMethodThrowsNPEForNullArg() {
+    final double value = 0.0;
+    final ThDoubleConsumer<Throwable> block = null;
+
+    assertThatThrownBy(() -> JKScope.withDouble(value, block))
+      .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void with2ArgsStaticMethodThrowsNPEForNullArg() {
+    final Object value1 = new Object();
+    final Object value2 = new Object();
     final ThBiConsumer<Object, Object, Throwable> block = null;
-    final Object arg1 = new Object();
-    final Object arg2 = new Object();
 
-    assertThatThrownBy(() -> JKScope.with(arg1, arg2, block))
+    assertThatThrownBy(() -> JKScope.with(value1, value2, block))
       .isInstanceOf(NullPointerException.class);
   }
 
   @Test
-  void withThTriConsumerStaticMethodThrowsNPEForNullArg() {
+  void with3ArgsStaticMethodThrowsNPEForNullArg() {
+    final Object value1 = new Object();
+    final Object value2 = new Object();
+    final Object value3 = new Object();
     final ThTriConsumer<Object, Object, Object, Throwable> block = null;
-    final Object arg1 = new Object();
-    final Object arg2 = new Object();
-    final Object arg3 = new Object();
 
-    assertThatThrownBy(() -> JKScope.with(arg1, arg2, arg3, block))
+    assertThatThrownBy(() -> JKScope.with(value1, value2, value3, block))
       .isInstanceOf(NullPointerException.class);
   }
 
   @Test
-  void withThFunctionStaticMethodThrowsNPEForNullArg() {
-    final ThFunction<Object, Object, Throwable> block = null;
-    final Object arg = new Object();
+  void letSupplierStaticMethodThrowsNPEForNullArg() {
+    final ThSupplier<Object, Throwable> block = null;
 
-    assertThatThrownBy(() -> JKScope.with(arg, block))
+    assertThatThrownBy(() -> JKScope.let(block))
       .isInstanceOf(NullPointerException.class);
   }
 
   @Test
-  void withThBiFunctionStaticMethodThrowsNPEForNullArg() {
-    final ThBiFunction<Object, Object, Object, Throwable> block = null;
-    final Object arg1 = new Object();
-    final Object arg2 = new Object();
+  void letIntSupplierStaticMethodThrowsNPEForNullArg() {
+    final ThIntSupplier<Throwable> block = null;
 
-    assertThatThrownBy(() -> JKScope.with(arg1, arg2, block))
+    assertThatThrownBy(() -> JKScope.letInt(block))
       .isInstanceOf(NullPointerException.class);
   }
 
   @Test
-  void withThTriFunctionStaticMethodThrowsNPEForNullArg() {
-    final ThTriFunction<Object, Object, Object, Object, Throwable> block = null;
-    final Object arg1 = new Object();
-    final Object arg2 = new Object();
-    final Object arg3 = new Object();
+  void letLongSupplierStaticMethodThrowsNPEForNullArg() {
+    final ThLongSupplier<Throwable> block = null;
 
-    assertThatThrownBy(() -> JKScope.with(arg1, arg2, arg3, block))
+    assertThatThrownBy(() -> JKScope.letLong(block))
       .isInstanceOf(NullPointerException.class);
   }
 
   @Test
-  void withNonNullThConsumerStaticMethodThrowsNPEForNullArg() {
+  void letDoubleSupplierStaticMethodThrowsNPEForNullArg() {
+    final ThDoubleSupplier<Throwable> block = null;
+
+    assertThatThrownBy(() -> JKScope.letDouble(block))
+      .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void letConsumerStaticMethodThrowsNPEForNullArg() {
+    final Object value = new Object();
     final ThConsumer<Object, Throwable> block = null;
-    final Object arg = new Object();
 
-    assertThatThrownBy(() -> withNonNull(arg, block))
+    assertThatThrownBy(() -> JKScope.let(value, block))
       .isInstanceOf(NullPointerException.class);
   }
 
   @Test
-  void withNonNullThBiConsumerStaticMethodThrowsNPEForNullArg() {
-    final ThBiConsumer<Object, Object, Throwable> block = null;
-    final Object arg1 = new Object();
-    final Object arg2 = new Object();
+  void letIntConsumerStaticMethodThrowsNPEForNullArg() {
+    final int value = 0;
+    final ThIntConsumer<Throwable> block = null;
 
-    assertThatThrownBy(() -> withNonNull(arg1, arg2, block))
+    assertThatThrownBy(() -> JKScope.letInt(value, block))
       .isInstanceOf(NullPointerException.class);
   }
 
   @Test
-  void withNonNullThTriConsumerStaticMethodThrowsNPEForNullArg() {
-    final ThTriConsumer<Object, Object, Object, Throwable> block = null;
-    final Object arg1 = new Object();
-    final Object arg2 = new Object();
-    final Object arg3 = new Object();
+  void letLongConsumerStaticMethodThrowsNPEForNullArg() {
+    final long value = 0L;
+    final ThLongConsumer<Throwable> block = null;
 
-    assertThatThrownBy(() -> withNonNull(arg1, arg2, arg3, block))
+    assertThatThrownBy(() -> JKScope.letLong(value, block))
       .isInstanceOf(NullPointerException.class);
   }
 
   @Test
-  void withNonNullThFunctionStaticMethodThrowsNPEForNullArg() {
+  void letDoubleConsumerStaticMethodThrowsNPEForNullArg() {
+    final double value = 0.0;
+    final ThDoubleConsumer<Throwable> block = null;
+
+    assertThatThrownBy(() -> JKScope.letDouble(value, block))
+      .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void letRecStaticMethodThrowsNPEForNullArg() {
+    final Object value = new Object();
+    final ThBiFunction<Object, ThFunction<Object, Object, Throwable>, Object, Throwable> block = null;
+
+    assertThatThrownBy(() -> JKScope.letRec(value, block))
+      .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void letIntRecStaticMethodThrowsNPEForNullArg() {
+    final int value = 0;
+    final ThIntObjToIntFunction<ThIntToIntFunction<Throwable>, Throwable> block = null;
+
+    assertThatThrownBy(() -> JKScope.letIntRec(value, block))
+      .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void letLongRecStaticMethodThrowsNPEForNullArg() {
+    final long value = 0L;
+    final ThLongObjToLongFunction<ThLongToLongFunction<Throwable>, Throwable> block = null;
+
+    assertThatThrownBy(() -> JKScope.letLongRec(value, block))
+      .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void letDoubleRecStaticMethodThrowsNPEForNullArg() {
+    final double value = 0L;
+    final ThDoubleObjToDoubleFunction<ThDoubleToDoubleFunction<Throwable>, Throwable> block = null;
+
+    assertThatThrownBy(() -> JKScope.letDoubleRec(value, block))
+      .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void letWithStaticMethodThrowsNPEForNullArg() {
+    final Object value = new Object();
     final ThFunction<Object, Object, Throwable> block = null;
-    final Object arg = new Object();
 
-    assertThatThrownBy(() -> withNonNull(arg, block))
+    assertThatThrownBy(() -> JKScope.letWith(value, block))
       .isInstanceOf(NullPointerException.class);
   }
 
   @Test
-  void withNonNullThBiFunctionStaticMethodThrowsNPEForNullArg() {
+  void letWith2ArgsStaticMethodThrowsNPEForNullArg() {
+    final Object value1 = new Object();
+    final Object value2 = new Object();
     final ThBiFunction<Object, Object, Object, Throwable> block = null;
-    final Object arg1 = new Object();
-    final Object arg2 = new Object();
 
-    assertThatThrownBy(() -> withNonNull(arg1, arg2, block))
+    assertThatThrownBy(() -> JKScope.letWith(value1, value2, block))
       .isInstanceOf(NullPointerException.class);
   }
 
   @Test
-  void withNonNullThTriFunctionStaticMethodThrowsNPEForNullArg() {
+  void letWith3ArgsStaticMethodThrowsNPEForNullArg() {
+    final Object value1 = new Object();
+    final Object value2 = new Object();
+    final Object value3 = new Object();
     final ThTriFunction<Object, Object, Object, Object, Throwable> block = null;
-    final Object arg1 = new Object();
-    final Object arg2 = new Object();
-    final Object arg3 = new Object();
 
-    assertThatThrownBy(() -> withNonNull(arg1, arg2, arg3, block))
+    assertThatThrownBy(() -> JKScope.letWith(value1, value2, value3, block))
       .isInstanceOf(NullPointerException.class);
   }
 
   //endregion
 
-  //region logic check for static methods
+  //region Logic check for static methods
 
   @Test
-  void letStaticMethod() {
+  void runStaticMethod() {
     final AtomicBoolean sideEffect = new AtomicBoolean(false);
-    final Throwable throwable = new Throwable();
-    final ThRunnable<Throwable> block = () -> {
-      sideEffect.set(true);
-      throw throwable;
-    };
+    final ThRunnable<Throwable> block = () -> sideEffect.set(true);
 
-    assertThatThrownBy(() -> JKScope.let(block))
-      .isSameAs(throwable);
+    JKScope.run(block);
     assertThat(sideEffect.get())
       .isTrue();
   }
 
   @Test
-  void runStaticMethodException() {
+  void runStaticMethodThrowsException() {
     final Throwable throwable = new Throwable();
-    final ThSupplier<Object, Throwable> block = () -> { throw throwable; };
+    final ThRunnable<Throwable> block = () -> { throw throwable; };
 
     assertThatThrownBy(() -> JKScope.run(block))
       .isSameAs(throwable);
   }
 
   @Test
-  void runStaticMethodResult() {
-    final Object supplierResult = new Object();
-    final ThSupplier<Object, Throwable> block = () -> supplierResult;
+  void runCatchingStaticMethod() {
+    final AtomicBoolean sideEffect = new AtomicBoolean(false);
+    final ThRunnable<Throwable> block = () -> {
+      sideEffect.set(true);
+      throw new Throwable();
+    };
 
-    assertThat(JKScope.run(block))
-      .isSameAs(supplierResult);
+    JKScope.runCatching(block);
+    assertThat(sideEffect.get())
+      .isTrue();
+  }
+
+  @Test
+  void runRecStaticMethodThrowsException() {
+    final Throwable throwable = new Throwable();
+    final ThConsumer<ThRunnable<Throwable>, Throwable> block = arg -> { throw throwable; };
+
+    assertThatThrownBy(() -> JKScope.runRec(block))
+      .isSameAs(throwable);
+  }
+
+  @Test
+  void runRecStaticMethod() throws Throwable {
+    final AtomicReference<ThRunnable<Throwable>> funcRef = new AtomicReference<>();
+    final ThConsumer<ThRunnable<Throwable>, Throwable> block = arg -> funcRef.set(arg);
+
+    JKScope.runRec(block);
+    assertThat(funcRef.get())
+      .isNotNull();
+
+    final ThRunnable<Throwable> func = funcRef.get();
+    funcRef.set(null);
+
+    func.run();
+    assertThat(funcRef.get())
+      .isSameAs(func);
+  }
+
+  @Test
+  void withStaticMethod() {
+    final Object value = new Object();
+    final AtomicReference<Object> valueRef = new AtomicReference<>();
+    final ThConsumer<Object, Throwable> block = arg -> valueRef.set(arg);
+
+    JKScope.with(value, block);
+    assertThat(valueRef.get())
+      .isSameAs(value);
+  }
+
+  @Test
+  void withStaticMethodThrowsException() {
+    final Object value = new Object();
+    final Throwable throwable = new Throwable();
+    final ThConsumer<Object, Throwable> block = arg -> { throw throwable; };
+
+    assertThatThrownBy(() -> JKScope.with(value, block))
+      .isSameAs(throwable);
+  }
+
+  @Test
+  void withIntStaticMethod() {
+    final int value = 100;
+    final AtomicInteger valueRef = new AtomicInteger();
+    final ThIntConsumer<Throwable> block = arg -> valueRef.set(arg);
+
+    JKScope.withInt(value, block);
+    assertThat(valueRef.get())
+      .isEqualTo(value);
+  }
+
+  @Test
+  void withIntStaticMethodThrowsException() {
+    final int value = 100;
+    final Throwable throwable = new Throwable();
+    final ThIntConsumer<Throwable> block = arg -> { throw throwable; };
+
+    assertThatThrownBy(() -> JKScope.withInt(value, block))
+      .isSameAs(throwable);
+  }
+
+  @Test
+  void withLongStaticMethod() {
+    final long value = 100L;
+    final AtomicLong valueRef = new AtomicLong();
+    final ThLongConsumer<Throwable> block = arg -> valueRef.set(arg);
+
+    JKScope.withLong(value, block);
+    assertThat(valueRef.get())
+      .isSameAs(value);
+  }
+
+  @Test
+  void withLongStaticMethodThrowsException() {
+    final long value = 100L;
+    final Throwable throwable = new Throwable();
+    final ThLongConsumer<Throwable> block = arg -> { throw throwable; };
+
+    assertThatThrownBy(() -> JKScope.withLong(value, block))
+      .isSameAs(throwable);
+  }
+
+  @Test
+  void withDoubleStaticMethod() {
+    final double value = 100.0;
+    final AtomicReference<Double> valueRef = new AtomicReference<>();
+    final ThDoubleConsumer<Throwable> block = arg -> valueRef.set(arg);
+
+    JKScope.withDouble(value, block);
+    assertThat(valueRef.get())
+      .isEqualTo(value);
+  }
+
+  @Test
+  void withDoubleStaticMethodThrowsException() {
+    final double value = 100.0;
+    final Throwable throwable = new Throwable();
+    final ThDoubleConsumer<Throwable> block = arg -> { throw throwable; };
+
+    assertThatThrownBy(() -> JKScope.withDouble(value, block))
+      .isSameAs(throwable);
+  }
+
+  @Test
+  void with2ArgsStaticMethod() {
+    final Object value1 = new Object();
+    final Object value2 = new Object();
+    final AtomicReference<Object> value1Ref = new AtomicReference<>();
+    final AtomicReference<Object> value2Ref = new AtomicReference<>();
+    final ThBiConsumer<Object, Object, Throwable> block = (arg1, arg2) -> {
+      value1Ref.set(arg1);
+      value2Ref.set(arg2);
+    };
+
+    JKScope.with(value1, value2, block);
+    assertThat(value1Ref.get())
+      .isSameAs(value1);
+    assertThat(value2Ref.get())
+      .isSameAs(value2);
+  }
+
+  @Test
+  void with2ArgsStaticMethodThrowsException() {
+    final Object value1 = new Object();
+    final Object value2 = new Object();
+    final Throwable throwable = new Throwable();
+    final ThBiConsumer<Object, Object, Throwable> block = (arg1, arg2) -> { throw throwable; };
+
+    assertThatThrownBy(() -> JKScope.with(value1, value2, block))
+      .isSameAs(throwable);
+  }
+
+  @Test
+  void with3ArgsStaticMethod() {
+    final Object value1 = new Object();
+    final Object value2 = new Object();
+    final Object value3 = new Object();
+    final AtomicReference<Object> value1Ref = new AtomicReference<>();
+    final AtomicReference<Object> value2Ref = new AtomicReference<>();
+    final AtomicReference<Object> value3Ref = new AtomicReference<>();
+    final ThTriConsumer<Object, Object, Object, Throwable> block = (arg1, arg2, arg3) -> {
+      value1Ref.set(arg1);
+      value2Ref.set(arg2);
+      value3Ref.set(arg3);
+    };
+
+    JKScope.with(value1, value2, value3, block);
+    assertThat(value1Ref.get())
+      .isSameAs(value1);
+    assertThat(value2Ref.get())
+      .isSameAs(value2);
+    assertThat(value3Ref.get())
+      .isSameAs(value3);
+  }
+
+  @Test
+  void with3ArgsStaticMethodThrowsException() {
+    final Object value1 = new Object();
+    final Object value2 = new Object();
+    final Object value3 = new Object();
+    final Throwable throwable = new Throwable();
+    final ThTriConsumer<Object, Object, Object, Throwable> block = (arg1, arg2, arg3) -> { throw throwable; };
+
+    assertThatThrownBy(() -> JKScope.with(value1, value2, value3, block))
+      .isSameAs(throwable);
+  }
+
+  @Test
+  void letStaticMethod() {
+    final Object nonNullValue = new Object();
+    assertThat(JKScope.let(nonNullValue).get())
+      .isSameAs(nonNullValue);
+
+    final Object nullValue = null;
+    assertThat(JKScope.let(nullValue).get())
+      .isNull();
+  }
+
+  @Test
+  void letNonNullStaticMethod() {
+    final Object nonNullValue = new Object();
+    assertThat(JKScope.letNonNull(nonNullValue).get())
+      .isSameAs(nonNullValue);
+
+    final Object nullValue = null;
+    assertThat(JKScope.letNonNull(nullValue).isEmpty())
+      .isTrue();
+  }
+
+  @Test
+  void letSupplierStaticMethod() {
+    final Object result = new Object();
+    final ThSupplier<Object, Throwable> block = () -> result;
+
+    assertThat(JKScope.let(block))
+      .isSameAs(result);
+  }
+
+  @Test
+  void letSupplierStaticMethodThrowsException() {
+    final Throwable throwable = new Throwable();
+    final ThSupplier<Object, Throwable> block = () -> { throw throwable; };
+
+    assertThatThrownBy(() -> JKScope.let(block))
+      .isSameAs(throwable);
+  }
+
+  @Test
+  void letIntSupplierStaticMethod() {
+    final int result = 100;
+    final ThIntSupplier<Throwable> block = () -> result;
+
+    assertThat(JKScope.letInt(block))
+      .isSameAs(result);
+  }
+
+  @Test
+  void letIntSupplierStaticMethodThrowsException() {
+    final Throwable throwable = new Throwable();
+    final ThIntSupplier<Throwable> block = () -> { throw throwable; };
+
+    assertThatThrownBy(() -> JKScope.letInt(block))
+      .isSameAs(throwable);
+  }
+
+  @Test
+  void letLongSupplierStaticMethod() {
+    final long result = 100L;
+    final ThLongSupplier<Throwable> block = () -> result;
+
+    assertThat(JKScope.letLong(block))
+      .isSameAs(result);
+  }
+
+  @Test
+  void letLongSupplierStaticMethodThrowsException() {
+    final Throwable throwable = new Throwable();
+    final ThLongSupplier<Throwable> block = () -> { throw throwable; };
+
+    assertThatThrownBy(() -> JKScope.letLong(block))
+      .isSameAs(throwable);
+  }
+
+  @Test
+  void letDoubleSupplierStaticMethod() {
+    final double result = 100.0;
+    final ThDoubleSupplier<Throwable> block = () -> result;
+
+    assertThat(JKScope.letDouble(block))
+      .isEqualTo(result);
+  }
+
+  @Test
+  void letDoubleSupplierStaticMethodThrowsException() {
+    final Throwable throwable = new Throwable();
+    final ThDoubleSupplier<Throwable> block = () -> { throw throwable; };
+
+    assertThatThrownBy(() -> JKScope.letDouble(block))
+      .isSameAs(throwable);
+  }
+
+  @Test
+  void letConsumerStaticMethod() {
+    final Object value = new Object();
+    final AtomicReference<Object> valueRef = new AtomicReference<>();
+    final ThConsumer<Object, Throwable> block = arg -> valueRef.set(arg);
+
+    assertThat(JKScope.let(value, block))
+      .isSameAs(value);
+    assertThat(valueRef.get())
+      .isSameAs(value);
+  }
+
+  @Test
+  void letConsumerStaticMethodThrowsException() {
+    final Object value = new Object();
+    final Throwable throwable = new Throwable();
+    final ThConsumer<Object, Throwable> block = arg -> { throw throwable; };
+
+    assertThatThrownBy(() -> JKScope.let(value, block))
+      .isSameAs(throwable);
+  }
+
+  @Test
+  void letIntConsumerStaticMethod() {
+    final int value = 100;
+    final AtomicInteger valueRef = new AtomicInteger();
+    final ThIntConsumer<Throwable> block = arg -> valueRef.set(arg);
+
+    assertThat(JKScope.letInt(value, block))
+      .isEqualTo(value);
+    assertThat(valueRef.get())
+      .isEqualTo(value);
+  }
+
+  @Test
+  void letIntConsumerStaticMethodThrowsException() {
+    final int value = 100;
+    final Throwable throwable = new Throwable();
+    final ThIntConsumer<Throwable> block = arg -> { throw throwable; };
+
+    assertThatThrownBy(() -> JKScope.letInt(value, block))
+      .isSameAs(throwable);
+  }
+
+  @Test
+  void letLongConsumerStaticMethod() {
+    final long value = 100L;
+    final AtomicLong valueRef = new AtomicLong();
+    final ThLongConsumer<Throwable> block = arg -> valueRef.set(arg);
+
+    assertThat(JKScope.letLong(value, block))
+      .isSameAs(value);
+    assertThat(valueRef.get())
+      .isSameAs(value);
+  }
+
+  @Test
+  void letLongConsumerStaticMethodThrowsException() {
+    final long value = 100L;
+    final Throwable throwable = new Throwable();
+    final ThLongConsumer<Throwable> block = arg -> { throw throwable; };
+
+    assertThatThrownBy(() -> JKScope.letLong(value, block))
+      .isSameAs(throwable);
+  }
+
+  @Test
+  void letDoubleConsumerStaticMethod() {
+    final double value = 100.0;
+    final AtomicReference<Double> valueRef = new AtomicReference<>();
+    final ThDoubleConsumer<Throwable> block = arg -> valueRef.set(arg);
+
+    assertThat(JKScope.letDouble(value, block))
+      .isEqualTo(value);
+    assertThat(valueRef.get())
+      .isEqualTo(value);
+  }
+
+  @Test
+  void letDoubleConsumerStaticMethodThrowsException() {
+    final double value = 100.0;
+    final Throwable throwable = new Throwable();
+    final ThDoubleConsumer<Throwable> block = arg -> { throw throwable; };
+
+    assertThatThrownBy(() -> JKScope.letDouble(value, block))
+      .isSameAs(throwable);
+  }
+
+  @Test
+  void letRecStaticMethod() throws Throwable {
+    final Object value = new Object();
+    final Object result = new Object();
+    final AtomicReference<Object> valueRef = new AtomicReference<>();
+    final AtomicReference<ThFunction<Object, Object, Throwable>> funcRef = new AtomicReference<>();
+    final ThBiFunction<Object, ThFunction<Object, Object, Throwable>, Object, Throwable> block = (arg1, arg2) -> {
+      valueRef.set(arg1);
+      funcRef.set(arg2);
+      return result;
+    };
+
+    assertThat(JKScope.letRec(value, block))
+      .isSameAs(result);
+    assertThat(valueRef.get())
+      .isSameAs(value);
+
+    final ThFunction<Object, Object, Throwable> func = funcRef.get();
+    valueRef.set(null);
+    funcRef.set(null);
+
+    assertThat(func.apply(value))
+      .isSameAs(result);
+    assertThat(valueRef.get())
+      .isSameAs(value);
+  }
+
+  @Test
+  void letRecStaticMethodThrowsException() {
+    final Object value = new Object();
+    final Throwable throwable = new Throwable();
+    final ThBiFunction<Object, ThFunction<Object, Object, Throwable>, Object, Throwable> block =
+      (arg1, arg2) -> { throw throwable; };
+
+    assertThatThrownBy(() -> JKScope.letRec(value, block))
+      .isSameAs(throwable);
+  }
+
+  @Test
+  void letIntRecStaticMethod() throws Throwable {
+    final int value = 100;
+    final int result = 999;
+    final AtomicInteger valueRef = new AtomicInteger();
+    final AtomicReference<ThIntToIntFunction<Throwable>> funcRef = new AtomicReference<>();
+    final ThIntObjToIntFunction<ThIntToIntFunction<Throwable>, Throwable> block = (arg1, arg2) -> {
+      valueRef.set(arg1);
+      funcRef.set(arg2);
+      return result;
+    };
+
+    assertThat(JKScope.letIntRec(value, block))
+      .isEqualTo(result);
+    assertThat(valueRef.get())
+      .isEqualTo(value);
+
+    final ThIntToIntFunction<Throwable> func = funcRef.get();
+    valueRef.set(0);
+    funcRef.set(null);
+
+    assertThat(func.apply(value))
+      .isEqualTo(result);
+    assertThat(valueRef.get())
+      .isEqualTo(value);
+  }
+
+  @Test
+  void letIntRecStaticMethodThrowsException() {
+    final int value = 100;
+    final Throwable throwable = new Throwable();
+    final ThIntObjToIntFunction<ThIntToIntFunction<Throwable>, Throwable> block =
+      (arg1, arg2) -> { throw throwable; };
+
+    assertThatThrownBy(() -> JKScope.letIntRec(value, block))
+      .isSameAs(throwable);
+  }
+
+  @Test
+  void letLongRecStaticMethod() throws Throwable {
+    final long value = 100L;
+    final long result = 999L;
+    final AtomicLong valueRef = new AtomicLong();
+    final AtomicReference<ThLongToLongFunction<Throwable>> funcRef = new AtomicReference<>();
+    final ThLongObjToLongFunction<ThLongToLongFunction<Throwable>, Throwable> block = (arg1, arg2) -> {
+      valueRef.set(arg1);
+      funcRef.set(arg2);
+      return result;
+    };
+
+    assertThat(JKScope.letLongRec(value, block))
+      .isEqualTo(result);
+    assertThat(valueRef.get())
+      .isEqualTo(value);
+
+    final ThLongToLongFunction<Throwable> func = funcRef.get();
+    valueRef.set(0L);
+    funcRef.set(null);
+
+    assertThat(func.apply(value))
+      .isEqualTo(result);
+    assertThat(valueRef.get())
+      .isEqualTo(value);
+  }
+
+  @Test
+  void letLongRecStaticMethodThrowsException() {
+    final long value = 100L;
+    final Throwable throwable = new Throwable();
+    final ThLongObjToLongFunction<ThLongToLongFunction<Throwable>, Throwable> block =
+      (arg1, arg2) -> { throw throwable; };
+
+    assertThatThrownBy(() -> JKScope.letLongRec(value, block))
+      .isSameAs(throwable);
+  }
+
+  @Test
+  void letDoubleRecStaticMethod() throws Throwable {
+    final double value = 100.0;
+    final double result = 999.0;
+    final AtomicReference<Double> valueRef = new AtomicReference<>();
+    final AtomicReference<ThDoubleToDoubleFunction<Throwable>> funcRef = new AtomicReference<>();
+    final ThDoubleObjToDoubleFunction<ThDoubleToDoubleFunction<Throwable>, Throwable> block = (arg1, arg2) -> {
+      valueRef.set(arg1);
+      funcRef.set(arg2);
+      return result;
+    };
+
+    assertThat(JKScope.letDoubleRec(value, block))
+      .isEqualTo(result);
+    assertThat(valueRef.get())
+      .isEqualTo(value);
+
+    final ThDoubleToDoubleFunction<Throwable> func = funcRef.get();
+    valueRef.set(null);
+    funcRef.set(null);
+
+    assertThat(func.apply(value))
+      .isEqualTo(result);
+    assertThat(valueRef.get())
+      .isEqualTo(value);
+  }
+
+  @Test
+  void letDoubleRecStaticMethodThrowsException() {
+    final double value = 100.0;
+    final Throwable throwable = new Throwable();
+    final ThDoubleObjToDoubleFunction<ThDoubleToDoubleFunction<Throwable>, Throwable> block =
+      (arg1, arg2) -> { throw throwable; };
+
+    assertThatThrownBy(() -> JKScope.letDoubleRec(value, block))
+      .isSameAs(throwable);
+  }
+
+  @Test
+  void letWithStaticMethod() {
+    final Object value = new Object();
+    final Object result = new Object();
+    final AtomicReference<Object> valueRef = new AtomicReference<>();
+    final ThFunction<Object, Object, Throwable> block = arg -> {
+      valueRef.set(arg);
+      return result;
+    };
+
+    assertThat(JKScope.letWith(value, block))
+      .isSameAs(result);
+    assertThat(valueRef.get())
+      .isSameAs(value);
+  }
+
+  @Test
+  void letWithStaticMethodThrowsException() {
+    final Object value = new Object();
+    final Throwable throwable = new Throwable();
+    final ThFunction<Object, Object, Throwable> block = arg -> { throw throwable; };
+
+    assertThatThrownBy(() -> JKScope.letWith(value, block))
+      .isSameAs(throwable);
+  }
+
+  @Test
+  void letWith2ArgsStaticMethod() {
+    final Object value1 = new Object();
+    final Object value2 = new Object();
+    final Object result = new Object();
+    final AtomicReference<Object> value1Ref = new AtomicReference<>();
+    final AtomicReference<Object> value2Ref = new AtomicReference<>();
+    final ThBiFunction<Object, Object, Object, Throwable> block = (arg1, arg2) -> {
+      value1Ref.set(arg1);
+      value2Ref.set(arg2);
+      return result;
+    };
+
+    assertThat(JKScope.letWith(value1, value2, block))
+      .isSameAs(result);
+    assertThat(value1Ref.get())
+      .isSameAs(value1);
+    assertThat(value2Ref.get())
+      .isSameAs(value2);
+  }
+
+  @Test
+  void letWith2ArgsStaticMethodThrowsException() {
+    final Object value1 = new Object();
+    final Object value2 = new Object();
+    final Throwable throwable = new Throwable();
+    final ThBiFunction<Object, Object, Object, Throwable> block = (arg1, arg2) -> { throw throwable; };
+
+    assertThatThrownBy(() -> JKScope.letWith(value1, value2, block))
+      .isSameAs(throwable);
+  }
+
+  @Test
+  void letWith3ArgsStaticMethod() {
+    final Object value1 = new Object();
+    final Object value2 = new Object();
+    final Object value3 = new Object();
+    final Object result = new Object();
+    final AtomicReference<Object> value1Ref = new AtomicReference<>();
+    final AtomicReference<Object> value2Ref = new AtomicReference<>();
+    final AtomicReference<Object> value3Ref = new AtomicReference<>();
+    final ThTriFunction<Object, Object, Object, Object, Throwable> block = (arg1, arg2, arg3) -> {
+      value1Ref.set(arg1);
+      value2Ref.set(arg2);
+      value3Ref.set(arg3);
+      return result;
+    };
+
+    assertThat(JKScope.letWith(value1, value2, value3, block))
+      .isSameAs(result);
+    assertThat(value1Ref.get())
+      .isSameAs(value1);
+    assertThat(value2Ref.get())
+      .isSameAs(value2);
+    assertThat(value3Ref.get())
+      .isSameAs(value3);
+  }
+
+  @Test
+  void letWith3ArgsStaticMethodThrowsException() {
+    final Object value1 = new Object();
+    final Object value2 = new Object();
+    final Object value3 = new Object();
+    final Throwable throwable = new Throwable();
+    final ThTriFunction<Object, Object, Object, Object, Throwable> block = (arg1, arg2, arg3) -> { throw throwable; };
+
+    assertThatThrownBy(() -> JKScope.letWith(value1, value2, value3, block))
+      .isSameAs(throwable);
   }
 
   //endregion
 
-  private static final class JKScopeImpl implements JKScope<JKScopeImpl> {
+  private static final class Impl implements JKScope<Impl> {
   }
 }

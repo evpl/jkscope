@@ -13,9 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/**
- * JKScope. Java scope functions inspired by Kotlin.
- *
- * @see <a href="https://github.com/evpl/jkscope">GitHub repository</a>
- */
 package com.plugatar.jkscope;
+
+/**
+ * Utility methods.
+ */
+final class Utils {
+
+  /**
+   * Ctor.
+   */
+  private Utils() {
+  }
+
+  static void blockArgNotNull(final Object block) {
+    if (block == null) {
+      throw new NullPointerException("block arg is null");
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  static <T> T uncheckedCast(final Object obj) {
+    return (T) obj;
+  }
+}

@@ -23,34 +23,34 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- * Tests for {@link ThFunction}.
+ * Tests for {@link ThDoubleToDoubleFunction}.
  */
-final class ThFunctionTest {
+final class ThDoubleToDoubleFunctionTest {
 
   @Test
   void asUncheckedMethod() {
-    final Object value = new Object();
-    final AtomicReference<Object> valueRef = new AtomicReference<>();
-    final Object result = new Object();
-    final ThFunction<Object, Object, Throwable> origin = arg -> {
+    final double value = 100.0;
+    final AtomicReference<Double> valueRef = new AtomicReference<>();
+    final double result = 999.0;
+    final ThDoubleToDoubleFunction<Throwable> origin = arg -> {
       valueRef.set(arg);
       return result;
     };
 
-    final ThFunction<Object, Object, RuntimeException> unchecked = origin.asUnchecked();
+    final ThDoubleToDoubleFunction<RuntimeException> unchecked = origin.asUnchecked();
     assertThat(unchecked.apply(value))
-      .isSameAs(result);
+      .isEqualTo(result);
     assertThat(valueRef.get())
-      .isSameAs(value);
+      .isEqualTo(value);
   }
 
   @Test
   void asUncheckedMethodThrowsException() {
-    final Object value = new Object();
+    final double value = 100.0;
     final Throwable throwable = new Throwable();
-    final ThFunction<Object, Object, Throwable> origin = arg -> { throw throwable; };
+    final ThDoubleToDoubleFunction<Throwable> origin = arg -> { throw throwable; };
 
-    final ThFunction<Object, Object, RuntimeException> unchecked = origin.asUnchecked();
+    final ThDoubleToDoubleFunction<RuntimeException> unchecked = origin.asUnchecked();
     assertThatThrownBy(() -> unchecked.apply(value))
       .isSameAs(throwable);
   }

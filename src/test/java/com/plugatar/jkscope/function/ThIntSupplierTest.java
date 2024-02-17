@@ -17,29 +17,31 @@ package com.plugatar.jkscope.function;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- * Tests for {@link ThRunnable}.
+ * Tests for {@link ThIntSupplier}.
  */
-final class ThRunnableTest {
+final class ThIntSupplierTest {
 
   @Test
   void asUncheckedMethod() {
-    final AtomicBoolean sideEffect = new AtomicBoolean(false);
-    final Throwable throwable = new Throwable();
-    final ThRunnable<Throwable> origin = () -> {
-      sideEffect.set(true);
-      throw throwable;
-    };
+    final int result = 100;
+    final ThIntSupplier<Throwable> origin = () -> result;
 
-    final ThRunnable<RuntimeException> unchecked = origin.asUnchecked();
-    assertThatThrownBy(() -> unchecked.run())
+    final ThIntSupplier<RuntimeException> unchecked = origin.asUnchecked();
+    assertThat(unchecked.get())
+      .isEqualTo(result);
+  }
+
+  @Test
+  void asUncheckedMethodThrowsException() {
+    final Throwable throwable = new Throwable();
+    final ThIntSupplier<Throwable> origin = () -> { throw throwable; };
+
+    final ThIntSupplier<RuntimeException> unchecked = origin.asUnchecked();
+    assertThatThrownBy(() -> unchecked.get())
       .isSameAs(throwable);
-    assertThat(sideEffect.get())
-      .isTrue();
   }
 }

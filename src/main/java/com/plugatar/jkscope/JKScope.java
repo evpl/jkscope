@@ -18,389 +18,683 @@ package com.plugatar.jkscope;
 import com.plugatar.jkscope.function.ThBiConsumer;
 import com.plugatar.jkscope.function.ThBiFunction;
 import com.plugatar.jkscope.function.ThConsumer;
+import com.plugatar.jkscope.function.ThDoubleConsumer;
+import com.plugatar.jkscope.function.ThDoubleObjToDoubleFunction;
+import com.plugatar.jkscope.function.ThDoubleSupplier;
+import com.plugatar.jkscope.function.ThDoubleToDoubleFunction;
 import com.plugatar.jkscope.function.ThFunction;
+import com.plugatar.jkscope.function.ThIntConsumer;
+import com.plugatar.jkscope.function.ThIntObjToIntFunction;
+import com.plugatar.jkscope.function.ThIntSupplier;
+import com.plugatar.jkscope.function.ThIntToIntFunction;
+import com.plugatar.jkscope.function.ThLongConsumer;
+import com.plugatar.jkscope.function.ThLongObjToLongFunction;
+import com.plugatar.jkscope.function.ThLongSupplier;
+import com.plugatar.jkscope.function.ThLongToLongFunction;
 import com.plugatar.jkscope.function.ThPredicate;
 import com.plugatar.jkscope.function.ThRunnable;
 import com.plugatar.jkscope.function.ThSupplier;
 import com.plugatar.jkscope.function.ThTriConsumer;
 import com.plugatar.jkscope.function.ThTriFunction;
 
+import java.util.concurrent.atomic.AtomicReference;
+
+import static com.plugatar.jkscope.Utils.blockArgNotNull;
+import static com.plugatar.jkscope.Utils.uncheckedCast;
+
 /**
- * This interface contains scope functions.
- * <p>
- * Instance methods:
+ * Implement this interface to use these methods:
  * <ul>
  * <li>{@link #let(ThConsumer)}</li>
- * <li>{@link #run(ThFunction)}</li>
  * <li>{@link #also(ThConsumer)}</li>
- * <li>{@link #apply(ThConsumer)}</li>
+ * <li>{@link #letOut(ThFunction)}</li>
+ * <li>{@link #letOpt(ThFunction)}</li>
  * <li>{@link #takeIf(ThPredicate)}</li>
  * <li>{@link #takeUnless(ThPredicate)}</li>
  * </ul>
- * Static methods:
+ * Example:
+ * <pre>{@code
+ * public class MyClass implements JKScope<MyClass> {
+ *   private int value = 0;
+ *
+ *   public void setIntValue(int value) {
+ *     this.value = value;
+ *   }
+ *
+ *   public int getIntValue() {
+ *     return this.value;
+ *   }
+ * }
+ *
+ * new MyClass().also(it -> it.setIntValue(20)).takeIf(it -> it.getIntValue() > 10).let(it -> System.out.println("ok"));
+ * }</pre>
+ * Use static methods anywhere:
  * <ul>
- * <li>{@link #let(ThRunnable)}</li>
- * <li>{@link #run(ThSupplier)}</li>
- * <li>{@link #with(Object)}</li>
+ * <li>{@link #run(ThRunnable)}</li>
+ * <li>{@link #runCatching(ThRunnable)}</li>
+ * <li>{@link #runRec(ThConsumer)}</li>
  * <li>{@link #with(Object, ThConsumer)}</li>
+ * <li>{@link #withInt(int, ThIntConsumer)}</li>
+ * <li>{@link #withLong(long, ThLongConsumer)}</li>
+ * <li>{@link #withDouble(double, ThDoubleConsumer)}</li>
  * <li>{@link #with(Object, Object, ThBiConsumer)}</li>
  * <li>{@link #with(Object, Object, Object, ThTriConsumer)}</li>
- * <li>{@link #with(Object, ThFunction)}</li>
- * <li>{@link #with(Object, Object, ThBiFunction)}</li>
- * <li>{@link #with(Object, Object, Object, ThTriFunction)}</li>
- * <li>{@link #withNonNull(Object)}</li>
- * <li>{@link #withNonNull(Object, ThConsumer)}</li>
- * <li>{@link #withNonNull(Object, Object, ThBiConsumer)}</li>
- * <li>{@link #withNonNull(Object, Object, Object, ThTriConsumer)}</li>
- * <li>{@link #withNonNull(Object, ThFunction)}</li>
- * <li>{@link #withNonNull(Object, Object, ThBiFunction)}</li>
- * <li>{@link #withNonNull(Object, Object, Object, ThTriFunction)}</li>
+ * <li>{@link #let(Object)}</li>
+ * <li>{@link #letNonNull(Object)}</li>
+ * <li>{@link #let(ThSupplier)}</li>
+ * <li>{@link #letInt(ThIntSupplier)}</li>
+ * <li>{@link #letLong(ThLongSupplier)}</li>
+ * <li>{@link #letDouble(ThDoubleSupplier)}</li>
+ * <li>{@link #let(Object, ThConsumer)}</li>
+ * <li>{@link #letInt(int, ThIntConsumer)}</li>
+ * <li>{@link #letLong(long, ThLongConsumer)}</li>
+ * <li>{@link #letDouble(double, ThDoubleConsumer)}</li>
+ * <li>{@link #letRec(Object, ThBiFunction)}</li>
+ * <li>{@link #letIntRec(int, ThIntObjToIntFunction)}</li>
+ * <li>{@link #letLongRec(long, ThLongObjToLongFunction)}</li>
+ * <li>{@link #letDoubleRec(double, ThDoubleObjToDoubleFunction)}</li>
+ * <li>{@link #letWith(Object, ThFunction)}</li>
+ * <li>{@link #letWith(Object, Object, ThBiFunction)}</li>
+ * <li>{@link #letWith(Object, Object, Object, ThTriFunction)}</li>
  * </ul>
+ * Some examples:
+ * <pre>{@code
+ * Map<String, Integer> map = let(new HashMap<>(), it -> {
+ *   it.put("value1", 1);
+ *   it.put("value2", 2);
+ * };
  *
- * @param <T> the type of the class implementing JKScope
+ * let("value").takeUnless(it -> it.isEmpty()).takeIf(it -> it.length() < 100).let(it -> System.out.println(it));
+ *
+ * int value = letIntRec(10, (n, func) -> {
+ *   if (n < 2) {
+ *     return n;
+ *   }
+ *   return func.apply(n - 1) + func.apply(n - 2);
+ * });
+ *
+ * with(new MyObject(), it -> {
+ *   System.out.println(it);
+ * });
+ * }</pre>
+ *
+ * @param <V> the type of the value
  */
-public interface JKScope<T extends JKScope<T>> extends SafeJKScope<T> {
+public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
 
   @Override
-  @SuppressWarnings("unchecked")
-  default void let(final ThConsumer<? super T, ?> block) {
-    if (block == null) { throw new NullPointerException("block arg is null"); }
-    block.asUnchecked().accept((T) this);
-  }
-
-  /**
-   * Performs given function on the value.
-   *
-   * @param block the function
-   * @param <R>   the type of function result
-   * @return function result
-   * @throws NullPointerException if {@code block} arg is null
-   */
-  @SuppressWarnings("unchecked")
-  default <R> R run(final ThFunction<? super T, ? extends R, ?> block) {
-    if (block == null) { throw new NullPointerException("block arg is null"); }
-    return block.asUnchecked().apply((T) this);
-  }
-
-  /**
-   * Performs given consumer on the value. Similar to the {@link #apply(ThConsumer)} method.
-   *
-   * @param block the consumer
-   * @return this
-   * @throws NullPointerException if {@code block} arg is null
-   */
-  @SuppressWarnings("unchecked")
-  default T also(final ThConsumer<? super T, ?> block) {
-    if (block == null) { throw new NullPointerException("block arg is null"); }
-    block.asUnchecked().accept((T) this);
-    return (T) this;
-  }
-
-  /**
-   * Performs given consumer on the value. Similar to the {@link #also(ThConsumer)} method.
-   *
-   * @param block the consumer
-   * @return this
-   * @throws NullPointerException if {@code block} arg is null
-   */
-  @SuppressWarnings("unchecked")
-  default T apply(final ThConsumer<? super T, ?> block) {
-    if (block == null) { throw new NullPointerException("block arg is null"); }
-    block.asUnchecked().accept((T) this);
-    return (T) this;
+  default V let(final ThConsumer<? super V, ?> block) {
+    blockArgNotNull(block);
+    block.asUnchecked().accept(uncheckedCast(this));
+    return uncheckedCast(this);
   }
 
   @Override
-  @SuppressWarnings("unchecked")
-  default JKScopeOpt<T> takeIf(final ThPredicate<? super T, ?> block) {
-    if (block == null) { throw new NullPointerException("block arg is null"); }
-    return block.asUnchecked().test((T) this)
-      ? JKScopeOpt.of((T) this)
-      : JKScopeOpt.empty();
+  default V also(final ThConsumer<? super V, ?> block) {
+    blockArgNotNull(block);
+    block.asUnchecked().accept(uncheckedCast(this));
+    return uncheckedCast(this);
   }
 
   @Override
-  @SuppressWarnings("unchecked")
-  default JKScopeOpt<T> takeUnless(final ThPredicate<? super T, ?> block) {
-    if (block == null) { throw new NullPointerException("block arg is null"); }
-    return block.asUnchecked().test((T) this)
-      ? JKScopeOpt.empty()
-      : JKScopeOpt.of((T) this);
+  default <R> R letOut(final ThFunction<? super V, ? extends R, ?> block) {
+    blockArgNotNull(block);
+    return block.asUnchecked().apply(uncheckedCast(this));
+  }
+
+  @Override
+  default <R> Opt<R> letOpt(final ThFunction<? super V, ? extends R, ?> block) {
+    blockArgNotNull(block);
+    return Opt.of(block.asUnchecked().apply(uncheckedCast(this)));
+  }
+
+  @Override
+  default Opt<V> takeIf(final ThPredicate<? super V, ?> block) {
+    blockArgNotNull(block);
+    return block.asUnchecked().test(uncheckedCast(this))
+      ? Opt.of(uncheckedCast(this))
+      : Opt.empty();
+  }
+
+  @Override
+  default Opt<V> takeUnless(final ThPredicate<? super V, ?> block) {
+    blockArgNotNull(block);
+    return block.asUnchecked().test(uncheckedCast(this))
+      ? Opt.empty()
+      : Opt.of(uncheckedCast(this));
   }
 
   /**
-   * Performs given runnable.
+   * Performs given function block.
+   * <pre>{@code
+   * run(() -> {
+   *   System.out.println("Hi");
+   * });
+   * }</pre>
    *
-   * @param block the runnable
+   * @param block the function block
    * @throws NullPointerException if {@code block} arg is null
    */
-  static void let(final ThRunnable<?> block) {
-    if (block == null) { throw new NullPointerException("block arg is null"); }
+  static void run(final ThRunnable<?> block) {
+    blockArgNotNull(block);
     block.asUnchecked().run();
   }
 
   /**
-   * Performs given supplier.
+   * Performs given function block and catching any {@link Throwable} exception.
+   * <pre>{@code
+   * runCatching(() -> {
+   *   if(new Random().nextInt(0, 100) == 50) {
+   *     throw new Throwable();
+   *   }
+   * });
+   * }</pre>
    *
-   * @param block the supplier
-   * @param <R>   the type of supplier result
-   * @return supplier result
+   * @param block the function block
    * @throws NullPointerException if {@code block} arg is null
    */
-  static <R> R run(final ThSupplier<? extends R, ?> block) {
-    if (block == null) { throw new NullPointerException("block arg is null"); }
+  static void runCatching(final ThRunnable<?> block) {
+    blockArgNotNull(block);
+    try {
+      block.asUnchecked().run();
+    } catch (final Throwable ignored) { }
+  }
+
+  /**
+   * Performs given function block recursively.
+   * <pre>{@code
+   * runRec(func -> {
+   *   if(new Random().nextInt(0, 100) == 50) {
+   *     func.run();
+   *   }
+   * });
+   * }</pre>
+   *
+   * @param block the function block
+   * @throws NullPointerException if {@code block} arg is null
+   */
+  static void runRec(final ThConsumer<ThRunnable<Throwable>, ?> block) {
+    blockArgNotNull(block);
+    final AtomicReference<ThRunnable<Throwable>> selfRef = new AtomicReference<>();
+    selfRef.set(() -> block.accept(selfRef.get()));
+    block.asUnchecked().accept(selfRef.get());
+  }
+
+  /**
+   * Performs given function block on given value.
+   * <pre>{@code
+   * with("Hi", v -> {
+   *   System.out.println(v);
+   * });
+   * }</pre>
+   *
+   * @param value the value
+   * @param block the function block
+   * @param <V>   the type of the value
+   * @throws NullPointerException if {@code block} arg is null
+   */
+  static <V> void with(final V value,
+                       final ThConsumer<? super V, ?> block) {
+    blockArgNotNull(block);
+    block.asUnchecked().accept(value);
+  }
+
+  /**
+   * Performs given function block on given {@code int} value.
+   * <pre>{@code
+   * withInt(42, v -> {
+   *   System.out.println(v);
+   * });
+   * }</pre>
+   *
+   * @param value the value
+   * @param block the function block
+   * @throws NullPointerException if {@code block} arg is null
+   */
+  static void withInt(final int value,
+                      final ThIntConsumer<?> block) {
+    blockArgNotNull(block);
+    block.asUnchecked().accept(value);
+  }
+
+  /**
+   * Performs given function block on given {@code long} value.
+   * <pre>{@code
+   * withLong(42L, v -> {
+   *   System.out.println(v);
+   * });
+   * }</pre>
+   *
+   * @param value the value
+   * @param block the function block
+   * @throws NullPointerException if {@code block} arg is null
+   */
+  static void withLong(final long value,
+                       final ThLongConsumer<?> block) {
+    blockArgNotNull(block);
+    block.asUnchecked().accept(value);
+  }
+
+  /**
+   * Performs given function block on given {@code double} value.
+   * <pre>{@code
+   * withDouble(42.0, v -> {
+   *   System.out.println(v);
+   * });
+   * }</pre>
+   *
+   * @param value the value
+   * @param block the function block
+   * @throws NullPointerException if {@code block} arg is null
+   */
+  static void withDouble(final double value,
+                         final ThDoubleConsumer<?> block) {
+    blockArgNotNull(block);
+    block.asUnchecked().accept(value);
+  }
+
+  /**
+   * Performs given function block on given values.
+   * <pre>{@code
+   * with("Hi", "Mark", (v1, v2) -> {
+   *   System.out.println(v1 + " " + v2);
+   * });
+   * }</pre>
+   *
+   * @param value1 the first value
+   * @param value2 the second value
+   * @param block  the function block
+   * @param <V1>   the type of the first value
+   * @param <V2>   the type of the second value
+   * @throws NullPointerException if {@code block} arg is null
+   */
+  static <V1, V2> void with(final V1 value1,
+                            final V2 value2,
+                            final ThBiConsumer<? super V1, ? super V2, ?> block) {
+    blockArgNotNull(block);
+    block.asUnchecked().accept(value1, value2);
+  }
+
+  /**
+   * Performs given function block on given values.
+   * <pre>{@code
+   * with("Oh", "Hi", "Mark", (v1, v2, v3) -> {
+   *   System.out.println(v1 + " " + v2 + " " + v3);
+   * });
+   * }</pre>
+   *
+   * @param value1 the first value
+   * @param value2 the second value
+   * @param value3 the third value
+   * @param block  the function block
+   * @param <V1>   the type of the first value
+   * @param <V2>   the type of the second value
+   * @param <V3>   the type of the third value
+   * @throws NullPointerException if {@code block} arg is null
+   */
+  static <V1, V2, V3> void with(final V1 value1,
+                                final V2 value2,
+                                final V3 value3,
+                                final ThTriConsumer<? super V1, ? super V2, ? super V3, ?> block) {
+    blockArgNotNull(block);
+    block.asUnchecked().accept(value1, value2, value3);
+  }
+
+  /**
+   * Returns {@link Opt} instance of given value, {@code null} is also considered as a value.
+   * <pre>{@code
+   * let(value).takeNonNull().takeUnless(it -> it.isEmpty()).takeIf(it -> it.length() < 100).let(it -> System.out.println(it));
+   * }</pre>
+   *
+   * @param value the value
+   * @param <V>   the type of the value
+   * @return {@link Opt} instance of given value
+   */
+  static <V> Opt<V> let(final V value) {
+    return Opt.of(value);
+  }
+
+  /**
+   * Returns {@link Opt} instance of given value or empty {@link Opt} instance if given value is null. Equivalent to
+   * calling a chain of methods: {@code let(value).takeNonNull()}.
+   * <pre>{@code
+   * letNonNull(value).takeUnless(it -> it.isEmpty()).takeIf(it -> it.length() < 100).let(it -> System.out.println(it));
+   * }</pre>
+   *
+   * @param value the value
+   * @param <V>   the type of the value
+   * @return {@link Opt} instance of given value or empty {@link Opt} instance if given value is null
+   */
+  static <V> Opt<V> letNonNull(final V value) {
+    return Opt.nonNullOf(value);
+  }
+
+  /**
+   * Performs given function block and returns result.
+   * <pre>{@code
+   * String value = let(() -> {
+   *   System.out.println("Hi");
+   *   return "str";
+   * });
+   * }</pre>
+   *
+   * @param block the function block
+   * @param <V>   the type of the result
+   * @return result
+   * @throws NullPointerException if {@code block} arg is null
+   */
+  static <V> V let(final ThSupplier<? extends V, ?> block) {
+    blockArgNotNull(block);
     return block.asUnchecked().get();
   }
 
   /**
-   * Returns JKScopeOpt instance with given value.
+   * Performs given function block and returns {@code int}-valued result.
+   * <pre>{@code
+   * int value = letInt(() -> {
+   *   System.out.println("Hi");
+   *   return 42;
+   * });
+   * }</pre>
    *
-   * @param t   the value
-   * @param <T> the type of the value
-   * @return JKScopeOpt instance with given value
-   */
-  static <T> JKScopeOpt<T> with(final T t) {
-    return JKScopeOpt.of(t);
-  }
-
-  /**
-   * Performs given consumer on the given value.
-   *
-   * @param t     the value
-   * @param block the consumer
-   * @param <T>   type of the value
+   * @param block the function block
+   * @return result
    * @throws NullPointerException if {@code block} arg is null
    */
-  static <T> void with(final T t,
-                       final ThConsumer<? super T, ?> block) {
-    if (block == null) { throw new NullPointerException("block arg is null"); }
-    block.asUnchecked().accept(t);
+  static int letInt(final ThIntSupplier<?> block) {
+    blockArgNotNull(block);
+    return block.asUnchecked().get();
   }
 
   /**
-   * Performs given consumer on the given values.
+   * Performs given function block and returns {@code long}-valued result.
+   * <pre>{@code
+   * long value = letLong(() -> {
+   *   System.out.println("Hi");
+   *   return 42L;
+   * });
+   * }</pre>
    *
-   * @param t     the first value
-   * @param u     the second value
-   * @param block the consumer
-   * @param <T>   type of the first value
-   * @param <U>   type of the second value
+   * @param block the function block
+   * @return result
    * @throws NullPointerException if {@code block} arg is null
    */
-  static <T, U> void with(final T t,
-                          final U u,
-                          final ThBiConsumer<? super T, ? super U, ?> block) {
-    if (block == null) { throw new NullPointerException("block arg is null"); }
-    block.asUnchecked().accept(t, u);
+  static long letLong(final ThLongSupplier<?> block) {
+    blockArgNotNull(block);
+    return block.asUnchecked().get();
   }
 
   /**
-   * Performs given consumer on the given values.
+   * Performs given function block and returns {@code double}-valued result.
+   * <pre>{@code
+   * double value = letDouble(() -> {
+   *   System.out.println("Hi");
+   *   return 42.0;
+   * });
+   * }</pre>
    *
-   * @param t     the first value
-   * @param u     the second value
-   * @param v     the third value
-   * @param block the consumer
-   * @param <T>   type of the first value
-   * @param <U>   type of the second value
-   * @param <V>   type of the third value
+   * @param block the function block
+   * @return result
    * @throws NullPointerException if {@code block} arg is null
    */
-  static <T, U, V> void with(final T t,
-                             final U u,
-                             final V v,
-                             final ThTriConsumer<? super T, ? super U, ? super V, ?> block) {
-    if (block == null) { throw new NullPointerException("block arg is null"); }
-    block.asUnchecked().accept(t, u, v);
+  static double letDouble(final ThDoubleSupplier<?> block) {
+    blockArgNotNull(block);
+    return block.asUnchecked().get();
   }
 
   /**
-   * Performs given function on the given value.
+   * Performs given function block on given value and returns this value.
+   * <pre>{@code
+   * String value = let("str", it -> {
+   *   System.out.println(it);
+   * });
+   * }</pre>
    *
-   * @param t     the value
-   * @param block the function
-   * @param <T>   type of the value
-   * @param <R>   the type of function result
-   * @return function result
+   * @param value the value
+   * @param block the function block
+   * @param <V>   the type of the value
+   * @return given value
    * @throws NullPointerException if {@code block} arg is null
    */
-  static <T, R> R with(final T t,
-                       final ThFunction<? super T, ? extends R, ?> block) {
-    if (block == null) { throw new NullPointerException("block arg is null"); }
-    return block.asUnchecked().apply(t);
+  static <V> V let(final V value,
+                   final ThConsumer<? super V, ?> block) {
+    blockArgNotNull(block);
+    block.asUnchecked().accept(value);
+    return value;
   }
 
   /**
-   * Performs given function on the given values.
+   * Performs given function block on given {@code int} value and returns this value.
+   * <pre>{@code
+   * int value = letInt(42, it -> {
+   *   System.out.println(it);
+   * });
+   * }</pre>
    *
-   * @param t     the first value
-   * @param u     the second value
-   * @param block the function
-   * @param <T>   the type of the first value
-   * @param <U>   the type of the second value
-   * @param <R>   the type of function result
-   * @return function result
+   * @param value the value
+   * @param block the function block
+   * @return given value
    * @throws NullPointerException if {@code block} arg is null
    */
-  static <T, U, R> R with(final T t,
-                          final U u,
-                          final ThBiFunction<? super T, ? super U, ? extends R, ?> block) {
-    if (block == null) { throw new NullPointerException("block arg is null"); }
-    return block.asUnchecked().apply(t, u);
+  static int letInt(final int value,
+                    final ThIntConsumer<?> block) {
+    blockArgNotNull(block);
+    block.asUnchecked().accept(value);
+    return value;
   }
 
   /**
-   * Performs given function on the given values.
+   * Performs given function block on given {@code long} value and returns this value.
+   * <pre>{@code
+   * long value = letLong(42L, it -> {
+   *   System.out.println(it);
+   * });
+   * }</pre>
    *
-   * @param t     the first value
-   * @param u     the second value
-   * @param v     the third value
-   * @param block the function
-   * @param <T>   the type of the first value
-   * @param <U>   the type of the second value
-   * @param <V>   the type of the third value
-   * @param <R>   the type of function result
-   * @return function result
+   * @param value the value
+   * @param block the function block
+   * @return given value
    * @throws NullPointerException if {@code block} arg is null
    */
-  static <T, U, V, R> R with(final T t,
-                             final U u,
-                             final V v,
-                             final ThTriFunction<? super T, ? super U, ? super V, ? extends R, ?> block) {
-    if (block == null) { throw new NullPointerException("block arg is null"); }
-    return block.asUnchecked().apply(t, u, v);
+  static long letLong(final long value,
+                      final ThLongConsumer<?> block) {
+    blockArgNotNull(block);
+    block.asUnchecked().accept(value);
+    return value;
   }
 
   /**
-   * Returns JKScopeOpt instance with given value or empty JKScopeOpt instance if value is null.
+   * Performs given function block on given {@code double} value and returns this value.
+   * <pre>{@code
+   * double value = letDouble(42.0, it -> {
+   *   System.out.println(it);
+   * });
+   * }</pre>
    *
-   * @param t   the value
-   * @param <T> the type of the value
-   * @return JKScopeOpt instance with given value or empty JKScopeOpt instance
-   */
-  static <T> JKScopeOpt<T> withNonNull(final T t) {
-    return t == null
-      ? JKScopeOpt.empty()
-      : JKScopeOpt.of(t);
-  }
-
-  /**
-   * Performs given consumer on the given value if value is non-null.
-   *
-   * @param t     the value
-   * @param block the consumer
-   * @param <T>   the type of the value
+   * @param value the value
+   * @param block the function block
+   * @return given value
    * @throws NullPointerException if {@code block} arg is null
    */
-  static <T> void withNonNull(final T t,
-                              final ThConsumer<? super T, ?> block) {
-    if (block == null) { throw new NullPointerException("block arg is null"); }
-    if (t != null) {
-      block.asUnchecked().accept(t);
-    }
+  static double letDouble(final double value,
+                          final ThDoubleConsumer<?> block) {
+    blockArgNotNull(block);
+    block.asUnchecked().accept(value);
+    return value;
   }
 
   /**
-   * Performs given consumer on the given values if all values are non-null.
+   * Performs given function block recursively and returns result.
+   * <pre>{@code
+   * Integer value = letRec(10, (n, func) -> {
+   *   if (n < 2) {
+   *     return n;
+   *   }
+   *   return func.apply(n - 1) + func.apply(n - 2);
+   * });
+   * }</pre>
    *
-   * @param t     the first value
-   * @param u     the second value
-   * @param block the consumer
-   * @param <T>   the type of the first value
-   * @param <U>   the type of the second value
+   * @param initialValue the initial value
+   * @param block        the function block
+   * @param <V>          the type of the value
+   * @return recursion result
    * @throws NullPointerException if {@code block} arg is null
    */
-  static <T, U> void withNonNull(final T t,
-                                 final U u,
-                                 final ThBiConsumer<? super T, ? super U, ?> block) {
-    if (block == null) { throw new NullPointerException("block arg is null"); }
-    if (t != null && u != null) {
-      block.asUnchecked().accept(t, u);
-    }
+  static <V> V letRec(final V initialValue,
+                      final ThBiFunction<? super V, ThFunction<V, V, Throwable>, ? extends V, ?> block) {
+    blockArgNotNull(block);
+    final AtomicReference<ThFunction<V, V, Throwable>> selfRef = new AtomicReference<>();
+    selfRef.set(v -> block.apply(v, selfRef.get()));
+    return block.asUnchecked().apply(initialValue, selfRef.get());
   }
 
   /**
-   * Performs given consumer on the given values if all values are non-null.
+   * Performs given function block recursively and returns {@code int}-valued result.
+   * <pre>{@code
+   * int value = letIntRec(10, (n, func) -> {
+   *   if (n < 2) {
+   *     return n;
+   *   }
+   *   return func.apply(n - 1) + func.apply(n - 2);
+   * });
+   * }</pre>
    *
-   * @param t     the first value
-   * @param u     the second value
-   * @param v     the third value
-   * @param block the consumer
-   * @param <T>   the type of the first value
-   * @param <U>   the type of the second value
-   * @param <V>   the type of the third value
+   * @param initialValue the initial value
+   * @param block        the function block
+   * @return recursion result
    * @throws NullPointerException if {@code block} arg is null
    */
-  static <T, U, V> void withNonNull(final T t,
-                                    final U u,
-                                    final V v,
-                                    final ThTriConsumer<? super T, ? super U, ? super V, ?> block) {
-    if (block == null) { throw new NullPointerException("block arg is null"); }
-    if (t != null && u != null && v != null) {
-      block.asUnchecked().accept(t, u, v);
-    }
+  static int letIntRec(final int initialValue,
+                       final ThIntObjToIntFunction<ThIntToIntFunction<Throwable>, ?> block) {
+    blockArgNotNull(block);
+    final AtomicReference<ThIntToIntFunction<Throwable>> selfRef = new AtomicReference<>();
+    selfRef.set(v -> block.apply(v, selfRef.get()));
+    return block.asUnchecked().apply(initialValue, selfRef.get());
   }
 
   /**
-   * Performs given function on the given value if value is non-null.
+   * Performs given function block recursively and returns {@code long}-valued result.
+   * <pre>{@code
+   * long value = letLongRec(10L, (n, func) -> {
+   *   if (n < 2L) {
+   *     return n;
+   *   }
+   *   return func.apply(n - 1L) + func.apply(n - 2L);
+   * });
+   * }</pre>
    *
-   * @param t     the value
-   * @param block the function
-   * @param <T>   the type of the value
-   * @param <R>   the type of the function result
-   * @return JKScopeOpt instance
+   * @param initialValue the initial value
+   * @param block        the function block
+   * @return recursion result
    * @throws NullPointerException if {@code block} arg is null
    */
-  static <T, R> JKScopeOpt<R> withNonNull(final T t,
-                                          final ThFunction<? super T, ? extends R, ?> block) {
-    if (block == null) { throw new NullPointerException("block arg is null"); }
-    return t != null
-      ? JKScopeOpt.of(block.asUnchecked().apply(t))
-      : JKScopeOpt.empty();
+  static long letLongRec(final long initialValue,
+                         final ThLongObjToLongFunction<ThLongToLongFunction<Throwable>, ?> block) {
+    blockArgNotNull(block);
+    final AtomicReference<ThLongToLongFunction<Throwable>> selfRef = new AtomicReference<>();
+    selfRef.set(v -> block.apply(v, selfRef.get()));
+    return block.asUnchecked().apply(initialValue, selfRef.get());
   }
 
   /**
-   * Performs given function on the given values if all values are non-null.
+   * Performs given function block recursively and returns {@code double}-valued result.
+   * <pre>{@code
+   * double value = letDoubleRec(10.0, (n, func) -> {
+   *   if (n < 2.0) {
+   *     return n;
+   *   }
+   *   return func.apply(n - 1.0) + func.apply(n - 2.0);
+   * });
+   * }</pre>
    *
-   * @param t     the first value
-   * @param u     the second value
-   * @param block the function
-   * @param <T>   the type of the first value
-   * @param <U>   the type of the second value
-   * @param <R>   the type of the function result
-   * @return JKScopeOpt instance
+   * @param initialValue the initial value
+   * @param block        the function block
+   * @return recursion result
    * @throws NullPointerException if {@code block} arg is null
    */
-  static <T, U, R> JKScopeOpt<R> withNonNull(final T t,
-                                             final U u,
-                                             final ThBiFunction<? super T, ? super U, ? extends R, ?> block) {
-    if (block == null) { throw new NullPointerException("block arg is null"); }
-    return t != null && u != null
-      ? JKScopeOpt.of(block.asUnchecked().apply(t, u))
-      : JKScopeOpt.empty();
+  static double letDoubleRec(final double initialValue,
+                             final ThDoubleObjToDoubleFunction<ThDoubleToDoubleFunction<Throwable>, ?> block) {
+    blockArgNotNull(block);
+    final AtomicReference<ThDoubleToDoubleFunction<Throwable>> selfRef = new AtomicReference<>();
+    selfRef.set(v -> block.apply(v, selfRef.get()));
+    return block.asUnchecked().apply(initialValue, selfRef.get());
   }
 
   /**
-   * Performs given function on the given values if all values are non-null.
+   * Performs given function block on given value and returns result.
+   * <pre>{@code
+   * String value = letWith("Hi", (str) -> {
+   *   System.out.println(str);
+   *   return "Oh " + str + " Mark";
+   * });
+   * }</pre>
    *
-   * @param t     the first value
-   * @param u     the second value
-   * @param v     the third value
-   * @param block the function
-   * @param <T>   the type of the first value
-   * @param <U>   the type of the second value
-   * @param <V>   the type of the third value
-   * @param <R>   the type of the function result
-   * @return JKScopeOpt instance
+   * @param value the value
+   * @param block the function block
+   * @param <V>   the type of the value
+   * @param <R>   the type of the result
+   * @return result
    * @throws NullPointerException if {@code block} arg is null
    */
-  static <T, U, V, R> JKScopeOpt<R> withNonNull(final T t,
-                                                final U u,
-                                                final V v,
-                                                final ThTriFunction<? super T, ? super U, ? super V, ? extends R, ?> block) {
-    if (block == null) { throw new NullPointerException("block arg is null"); }
-    return t != null && u != null && v != null
-      ? JKScopeOpt.of(block.asUnchecked().apply(t, u, v))
-      : JKScopeOpt.empty();
+  static <V, R> R letWith(final V value,
+                          final ThFunction<? super V, ? extends R, ?> block) {
+    blockArgNotNull(block);
+    return block.asUnchecked().apply(value);
+  }
+
+  /**
+   * Performs given function block on given value and returns result.
+   * <pre>{@code
+   * String value = letWith("Oh", "Hi", (str1, str2) -> {
+   *   System.out.println(str1);
+   *   System.out.println(str2);
+   *   return str1 + " " + str2 + " Mark";
+   * });
+   * }</pre>
+   *
+   * @param value1 the first value
+   * @param value2 the second value
+   * @param block  the function block
+   * @param <V1>   the type of first the value
+   * @param <V2>   the type of second the value
+   * @param <R>    the type of the result
+   * @return result
+   * @throws NullPointerException if {@code block} arg is null
+   */
+  static <V1, V2, R> R letWith(final V1 value1,
+                               final V2 value2,
+                               final ThBiFunction<? super V1, ? super V2, ? extends R, ?> block) {
+    blockArgNotNull(block);
+    return block.asUnchecked().apply(value1, value2);
+  }
+
+  /**
+   * Performs given function block on given value and returns result.
+   * <pre>{@code
+   * String value = letWith("Oh", "Hi", "Mark", (str1, str2, str3) -> {
+   *   System.out.println(str1);
+   *   System.out.println(str2);
+   *   System.out.println(str3);
+   *   return str1 + " " + str2 + " " + str3;
+   * });
+   * }</pre>
+   *
+   * @param value1 the first value
+   * @param value2 the second value
+   * @param value3 the third value
+   * @param block  the function block
+   * @param <V1>   the type of first the value
+   * @param <V2>   the type of second the value
+   * @param <V3>   the type of third the value
+   * @param <R>    the type of the result
+   * @return result
+   * @throws NullPointerException if {@code block} arg is null
+   */
+  static <V1, V2, V3, R> R letWith(final V1 value1,
+                                   final V2 value2,
+                                   final V3 value3,
+                                   final ThTriFunction<? super V1, ? super V2, ? super V3, ? extends R, ?> block) {
+    blockArgNotNull(block);
+    return block.asUnchecked().apply(value1, value2, value3);
   }
 }

@@ -29,18 +29,18 @@ final class ThConsumerTest {
 
   @Test
   void asUncheckedMethod() {
-    final Object consumerArg = new Object();
-    final AtomicReference<Object> argRef = new AtomicReference<>();
+    final Object value = new Object();
+    final AtomicReference<Object> valueRef = new AtomicReference<>();
     final Throwable throwable = new Throwable();
-    final ThConsumer<Object, Throwable> originConsumer = arg -> {
-      argRef.set(arg);
+    final ThConsumer<Object, Throwable> origin = arg -> {
+      valueRef.set(arg);
       throw throwable;
     };
 
-    final ThConsumer<Object, RuntimeException> unchecked = originConsumer.asUnchecked();
-    assertThatThrownBy(() -> unchecked.accept(consumerArg))
+    final ThConsumer<Object, RuntimeException> unchecked = origin.asUnchecked();
+    assertThatThrownBy(() -> unchecked.accept(value))
       .isSameAs(throwable);
-    assertThat(argRef.get())
-      .isSameAs(consumerArg);
+    assertThat(valueRef.get())
+      .isSameAs(value);
   }
 }
