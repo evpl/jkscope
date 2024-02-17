@@ -55,7 +55,7 @@ Maven:
 <dependency>
   <groupId>com.plugatar.jkscope</groupId>
   <artifactId>jkscope</artifactId>
-  <version>1.0</version>
+  <version>2.0</version>
 </dependency>
 ```
 
@@ -63,7 +63,7 @@ Gradle:
 
 ```groovy
 dependencies {
-    implementation 'com.plugatar.jkscope:jkscope:1.0'
+    implementation 'com.plugatar.jkscope:jkscope:2.0'
 }
 ```
 
