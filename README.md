@@ -2,6 +2,7 @@
 
 Java scope functions inspired by Kotlin
 
+![Last version](https://img.shields.io/badge/last_version-2.0-blue)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.plugatar.jkscope/jkscope/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.plugatar.jkscope/jkscope)
 [![Javadoc](https://javadoc.io/badge2/com.plugatar.jkscope/jkscope/javadoc.svg)](https://javadoc.io/doc/com.plugatar.jkscope/jkscope)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
@@ -46,7 +47,7 @@ public static void main(String[] args) {
 ## How to use
 
 Java version required: 1.8+. The library has no dependencies. All you need is this (get the latest
-version [here](https://github.com/evpl/jkscope/releases)):
+version [here](https://github.com/evpl/jkscope/releases)).
 
 Maven:
 
