@@ -1,11 +1,12 @@
 # JKScope
 
-Java scope functions inspired by Kotlin
-
-![Last version](https://img.shields.io/badge/last_version-2.0-blue)
+![Last version](https://img.shields.io/badge/last_version-2.0-blue "Last version")
 [![Maven Central](https://img.shields.io/maven-central/v/com.plugatar.jkscope/jkscope)](https://central.sonatype.com/artifact/com.plugatar.jkscope/jkscope)
 [![Javadoc](https://javadoc.io/badge2/com.plugatar.jkscope/jkscope/javadoc.svg)](https://javadoc.io/doc/com.plugatar.jkscope/jkscope)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/evpl/jkscope/tests.yml?branch=main)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
+Java scope functions inspired by Kotlin
 
 ## Table of Contents
 
@@ -21,6 +22,8 @@ Java scope functions inspired by Kotlin
     * [`run`, `runCatching` and `runRec`](#run-runcatching-and-runrec)
     * [`with`, `withInt`, `withLong` and `withDouble`](#with-withint-withlong-and-withdouble)
     * [`let` variations](#let-variations)
+  * [`Opt` monad](#opt-monad)
+  * [Examples](#examples)
 
 ## Motivation
 
@@ -46,12 +49,13 @@ public static void main(String[] args) {
 
 ## How to use
 
-Java version required: 1.8+. The library has no dependencies. All you need is this (get the latest
+Java 1.8+ version required. The library has no dependencies. All you need is this (get the latest
 version [here](https://github.com/evpl/jkscope/releases)).
 
 Maven:
 
 ```xml
+
 <dependency>
   <groupId>com.plugatar.jkscope</groupId>
   <artifactId>jkscope</artifactId>
@@ -209,3 +213,7 @@ int value = letIntRec(10, (n, func) -> {
 ```
 int value = letWith("42", it -> Integer.valueOf(it));
 ```
+
+### `Opt` monad
+
+### Examples
