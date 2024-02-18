@@ -279,6 +279,20 @@ final class OptTest {
   }
 
   @Test
+  void isEmptyMethod() {
+    final Opt<Object> nonEmptyOpt = Opt.of(new Object());
+    final Opt<Object> nonEmptyNullOpt = Opt.of(null);
+    final Opt<Object> emptyOpt = Opt.empty();
+
+    assertThat(nonEmptyOpt.isEmpty())
+      .isFalse();
+    assertThat(nonEmptyNullOpt.isEmpty())
+      .isFalse();
+    assertThat(emptyOpt.isEmpty())
+      .isTrue();
+  }
+
+  @Test
   void takeNonNullMethod() {
     final Object value = new Object();
     final Opt<Object> nonNullOpt = Opt.of(value);
@@ -291,17 +305,16 @@ final class OptTest {
   }
 
   @Test
-  void isEmptyMethod() {
+  void throwIfEmptyMethod() {
     final Opt<Object> nonEmptyOpt = Opt.of(new Object());
-    final Opt<Object> nonEmptyNullOpt = Opt.of(null);
     final Opt<Object> emptyOpt = Opt.empty();
+    final Throwable throwable = new Throwable();
+    final ThSupplier<Throwable, Throwable> throwableSupplier = () -> throwable;
 
-    assertThat(nonEmptyOpt.isEmpty())
-      .isFalse();
-    assertThat(nonEmptyNullOpt.isEmpty())
-      .isFalse();
-    assertThat(emptyOpt.isEmpty())
-      .isTrue();
+    assertThat(nonEmptyOpt.throwIfEmpty(throwableSupplier))
+      .isSameAs(nonEmptyOpt);
+    assertThatThrownBy(() -> emptyOpt.throwIfEmpty(throwableSupplier))
+      .isSameAs(throwable);
   }
 
   @Test

@@ -35,6 +35,13 @@ import static com.plugatar.jkscope.Utils.uncheckedCast;
 public interface Opt<V> extends BaseScope<V, Opt<V>> {
 
   /**
+   * Returns true If a value is not present, otherwise false.
+   *
+   * @return true If a value is not present, otherwise false
+   */
+  boolean isEmpty();
+
+  /**
    * Returns {@link Opt} instance of this value or empty {@link Opt} instance if given value is null.
    *
    * @return {@link Opt} instance of this value or empty {@link Opt} instance if given value is null
@@ -42,11 +49,13 @@ public interface Opt<V> extends BaseScope<V, Opt<V>> {
   Opt<V> takeNonNull();
 
   /**
-   * Returns true If a value is not present, otherwise false.
+   * Throws an exception produced by {@code block} function if this {@link Opt} instance is empty.
    *
-   * @return true If a value is not present, otherwise false
+   * @param block the block function
+   * @return value
+   * @throws NullPointerException if {@code block} arg is null
    */
-  boolean isEmpty();
+  Opt<V> throwIfEmpty(ThSupplier<? extends Throwable, ?> block);
 
   /**
    * Returns the value if a value is present, otherwise throws {@link NoSuchElementException}.
@@ -203,6 +212,12 @@ public interface Opt<V> extends BaseScope<V, Opt<V>> {
     }
 
     @Override
+    public Opt<V> throwIfEmpty(final ThSupplier<? extends Throwable, ?> block) {
+      blockArgNotNull(block);
+      return this;
+    }
+
+    @Override
     public V get() {
       return this.value;
     }
@@ -300,6 +315,14 @@ public interface Opt<V> extends BaseScope<V, Opt<V>> {
     @Override
     public Opt<V> takeNonNull() {
       return this;
+    }
+
+    @Override
+    public Opt<V> throwIfEmpty(final ThSupplier<? extends Throwable, ?> block) {
+      blockArgNotNull(block);
+      return ((ThFunction<ThSupplier<? extends Throwable, ?>, Opt<V>, ?>) it -> { throw it.get(); })
+        .asUnchecked()
+        .apply(block);
     }
 
     @Override
