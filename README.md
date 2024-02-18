@@ -24,6 +24,8 @@ Java scope functions inspired by Kotlin
     * [`let` variations](#let-variations)
   * [`Opt` monad](#opt-monad)
   * [Examples](#examples)
+    * [Collection initialization](#collection-initialization)
+    * [Nth Fibonacci Number](#nth-fibonacci-number)
 
 ## Motivation
 
@@ -216,4 +218,42 @@ int value = letWith("42", it -> Integer.valueOf(it));
 
 ### `Opt` monad
 
+The `Opt` monad is similar in meaning to Java `Optional`, but allows the null value.
+
+`Opt` monad contains standard `Optional` methods and scope functions methods:
+
+```
+String result = Opt.of("value").takeIf(it -> it.length() > 10).orElse("");
+
+String result = Opt.of("value").takeIf(it -> it.length() > 10).orElseGet(() -> "");
+
+String result = Opt.of("value").takeIf(it -> it.length() > 10).orElseThrow(() -> new IllegalArgumentException());
+```
+
 ### Examples
+
+#### Collection initialization
+
+```
+Map<String, Integer> map = let(new HashMap<>(), it -> {
+  it.put("val1", 1);
+  it.put("val2", 2);
+});
+
+List<String> list = let(new ArrayList<>(), it -> {
+  it.add("val1");
+  it.add("val2");
+});
+```
+
+#### Nth Fibonacci number
+
+```
+int value = letIntRec(10, (n, func) -> {
+  if (n < 2) {
+    return n;
+  }
+  return func.apply(n - 1) + func.apply(n - 2);
+});
+```
+
