@@ -77,6 +77,7 @@ import static com.plugatar.jkscope.Utils.uncheckedCast;
  * <li>{@link #withInt(int, ThIntConsumer)}</li>
  * <li>{@link #withLong(long, ThLongConsumer)}</li>
  * <li>{@link #withDouble(double, ThDoubleConsumer)}</li>
+ * <li>{@link #withResource(AutoCloseable, ThConsumer)}</li>
  * <li>{@link #with(Object, Object, ThBiConsumer)}</li>
  * <li>{@link #with(Object, Object, Object, ThTriConsumer)}</li>
  * <li>{@link #let(Object)}</li>
@@ -94,6 +95,7 @@ import static com.plugatar.jkscope.Utils.uncheckedCast;
  * <li>{@link #letLongRec(long, ThLongObjToLongFunction)}</li>
  * <li>{@link #letDoubleRec(double, ThDoubleObjToDoubleFunction)}</li>
  * <li>{@link #letWith(Object, ThFunction)}</li>
+ * <li>{@link #letWithResource(AutoCloseable, ThFunction)}</li>
  * <li>{@link #letWith(Object, Object, ThBiFunction)}</li>
  * <li>{@link #letWith(Object, Object, Object, ThTriFunction)}</li>
  * </ul>
