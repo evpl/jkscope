@@ -31,6 +31,7 @@ Java scope functions inspired by Kotlin
   * [Examples](#examples)
     * [Collection initialization](#collection-initialization)
     * [Nth Fibonacci number](#nth-fibonacci-number)
+    * [Method argument processing](#method-argument-processing)
 
 ## Motivation
 
@@ -45,6 +46,7 @@ version [here](https://github.com/evpl/jkscope/releases)).
 Maven:
 
 ```xml
+
 <dependency>
   <groupId>com.plugatar.jkscope</groupId>
   <artifactId>jkscope</artifactId>
