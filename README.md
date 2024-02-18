@@ -1,10 +1,14 @@
 # JKScope
 
-![Last version](https://img.shields.io/badge/last_version-2.0-blue "Last version")
+[![Last version](https://img.shields.io/badge/last_version-2.1-blue)](https://github.com/evpl/jkscope)
 [![Maven Central](https://img.shields.io/maven-central/v/com.plugatar.jkscope/jkscope)](https://central.sonatype.com/artifact/com.plugatar.jkscope/jkscope)
-[![Javadoc](https://javadoc.io/badge2/com.plugatar.jkscope/jkscope/javadoc.svg)](https://javadoc.io/doc/com.plugatar.jkscope/jkscope)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/evpl/jkscope/tests.yml?branch=main)
+[![Javadoc](https://javadoc.io/badge2/com.plugatar.jkscope/jkscope/javadoc.svg?color=blue)](https://javadoc.io/doc/com.plugatar.jkscope/jkscope)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/evpl/jkscope/build.yml?branch=main)](https://github.com/evpl/jkscope)
+[![Lines](https://sloc.xyz/github/evpl/jkscope/?category=lines)](https://github.com/evpl/jkscope)
+[![Code lines](https://sloc.xyz/github/evpl/jkscope/?category=code)](https://github.com/evpl/jkscope)
+[![Hits of Code](https://hitsofcode.com/github/evpl/jkscope?branch=main)](https://hitsofcode.com/github/evpl/jkscope/view?branch=main)
 
 Java scope functions inspired by Kotlin
 
@@ -20,48 +24,32 @@ Java scope functions inspired by Kotlin
     * [`letOpt`](#letopt)
   * [JKScope static methods](#jkscope-static-methods)
     * [`run`, `runCatching` and `runRec`](#run-runcatching-and-runrec)
-    * [`with`, `withInt`, `withLong` and `withDouble`](#with-withint-withlong-and-withdouble)
+    * [`with`, `withInt`, `withLong`, `withDouble` and `withResource`](#with-withint-withlong-withdouble-and-withresource)
     * [`let` variations](#let-variations)
   * [`Opt` monad](#opt-monad)
+  * [Unchecked functions](#unchecked-functions)
   * [Examples](#examples)
     * [Collection initialization](#collection-initialization)
-    * [Nth Fibonacci Number](#nth-fibonacci-number)
+    * [Nth Fibonacci number](#nth-fibonacci-number)
 
 ## Motivation
 
 Inspired by the [Kotlin scope function](https://kotlinlang.org/docs/scope-functions.html) I want to reduce the number of
 lines of my Java code and make this code more readable.
 
-This library should have been written at least for this feature alone 😄
-
-```
-Map<String, Integer> map = let(new HashMap<>(), it -> {
-  it.put("val1", 1);
-  it.put("val2", 2);
-});
-```
-
-It is also worth noting that all presented functions allow you to not process checked exceptions.
-
-```
-public static void main(String[] args) {
-  URI uri = let(() -> new URI("abc"));
-}
-```
-
 ## How to use
 
-Java 1.8+ version required. The library has no dependencies. All you need is this (get the latest
+Java 8+ version required. The library has no dependencies. All you need is this (get the latest
 version [here](https://github.com/evpl/jkscope/releases)).
 
 Maven:
 
 ```xml
-
 <dependency>
   <groupId>com.plugatar.jkscope</groupId>
   <artifactId>jkscope</artifactId>
-  <version>2.0</version>
+  <version>2.1</version>
+  <scope>compile</scope>
 </dependency>
 ```
 
@@ -69,7 +57,7 @@ Gradle:
 
 ```groovy
 dependencies {
-    implementation 'com.plugatar.jkscope:jkscope:2.0'
+    implementation 'com.plugatar.jkscope:jkscope:2.1'
 }
 ```
 
@@ -154,7 +142,7 @@ runRec(func -> {
 });
 ```
 
-#### `with`, `withInt`, `withLong` and `withDouble`
+#### `with`, `withInt`, `withLong`, `withDouble` and `withResource`
 
 These methods perform given function block on given values.
 
@@ -168,6 +156,8 @@ with(value1, value2, (v1, v2) -> {
   System.out.println(v2);
 });
 ```
+
+`withResource` method does the same thing, but with a `AutoCloseable` resource and closes this resource.
 
 #### `let` variations
 
@@ -216,11 +206,13 @@ int value = letIntRec(10, (n, func) -> {
 int value = letWith("42", it -> Integer.valueOf(it));
 ```
 
+`letWithResource` method does the same thing, but with a `AutoCloseable` resource and closes this resource.
+
 ### `Opt` monad
 
 The `Opt` monad is similar in meaning to Java `Optional`, but allows the null value.
 
-`Opt` monad contains standard `Optional` methods and scope functions methods:
+`Opt` monad contains some `Optional` methods and scope functions methods:
 
 ```
 String result = Opt.of("value").takeIf(it -> it.length() > 10).orElse("");
@@ -228,6 +220,16 @@ String result = Opt.of("value").takeIf(it -> it.length() > 10).orElse("");
 String result = Opt.of("value").takeIf(it -> it.length() > 10).orElseGet(() -> "");
 
 String result = Opt.of("value").takeIf(it -> it.length() > 10).orElseThrow(() -> new IllegalArgumentException());
+```
+
+### Unchecked functions
+
+All presented functions allow you to not process checked exceptions.
+
+```
+public static void main(String[] args) {
+  URI uri = let(() -> new URI("abc"));
+}
 ```
 
 ### Examples
@@ -257,3 +259,13 @@ int value = letIntRec(10, (n, func) -> {
 });
 ```
 
+#### Method argument processing
+
+```
+public static String checkNonNullNonEmptyStr(String value) {
+  return let(value)
+    .takeNonNull().throwIfEmpty(NullPointerException::new)
+    .takeUnless(String::isEmpty).throwIfEmpty(IllegalArgumentException::new)
+    .get();
+}
+```
