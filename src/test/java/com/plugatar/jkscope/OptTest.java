@@ -36,73 +36,97 @@ final class OptTest {
 
   @Test
   void letMethodThrowsNPEForNullArg() {
-    final Opt<Object> opt = Opt.of(new Object());
+    final Opt<Object> nonEmptyOpt = Opt.of(new Object());
+    final Opt<Object> emptyOpt = Opt.empty();
     final ThConsumer<Object, Throwable> block = null;
 
-    assertThatThrownBy(() -> opt.let(block))
+    assertThatThrownBy(() -> nonEmptyOpt.let(block))
+      .isInstanceOf(NullPointerException.class);
+    assertThatThrownBy(() -> emptyOpt.let(block))
       .isInstanceOf(NullPointerException.class);
   }
 
   @Test
   void alsoMethodThrowsNPEForNullArg() {
-    final Opt<Object> opt = Opt.of(new Object());
+    final Opt<Object> nonEmptyOpt = Opt.of(new Object());
+    final Opt<Object> emptyOpt = Opt.empty();
     final ThConsumer<Object, Throwable> block = null;
 
-    assertThatThrownBy(() -> opt.also(block))
+    assertThatThrownBy(() -> nonEmptyOpt.also(block))
+      .isInstanceOf(NullPointerException.class);
+    assertThatThrownBy(() -> emptyOpt.also(block))
       .isInstanceOf(NullPointerException.class);
   }
 
   @Test
   void letOutMethodThrowsNPEForNullArg() {
-    final Opt<Object> opt = Opt.of(new Object());
+    final Opt<Object> nonEmptyOpt = Opt.of(new Object());
+    final Opt<Object> emptyOpt = Opt.empty();
     final ThFunction<Object, Object, Throwable> block = null;
 
-    assertThatThrownBy(() -> opt.letOut(block))
+    assertThatThrownBy(() -> nonEmptyOpt.letOut(block))
+      .isInstanceOf(NullPointerException.class);
+    assertThatThrownBy(() -> emptyOpt.letOut(block))
       .isInstanceOf(NullPointerException.class);
   }
 
   @Test
   void letOptMethodThrowsNPEForNullArg() {
-    final Opt<Object> opt = Opt.of(new Object());
+    final Opt<Object> nonEmptyOpt = Opt.of(new Object());
+    final Opt<Object> emptyOpt = Opt.empty();
     final ThFunction<Object, Object, Throwable> block = null;
 
-    assertThatThrownBy(() -> opt.letOpt(block))
+    assertThatThrownBy(() -> nonEmptyOpt.letOpt(block))
+      .isInstanceOf(NullPointerException.class);
+    assertThatThrownBy(() -> emptyOpt.letOpt(block))
       .isInstanceOf(NullPointerException.class);
   }
 
   @Test
   void takeIfMethodThrowsNPEForNullArg() {
-    final Opt<Object> opt = Opt.of(new Object());
+    final Opt<Object> nonEmptyOpt = Opt.of(new Object());
+    final Opt<Object> emptyOpt = Opt.empty();
     final ThPredicate<Object, Throwable> block = null;
 
-    assertThatThrownBy(() -> opt.takeIf(block))
+    assertThatThrownBy(() -> nonEmptyOpt.takeIf(block))
+      .isInstanceOf(NullPointerException.class);
+    assertThatThrownBy(() -> emptyOpt.takeIf(block))
       .isInstanceOf(NullPointerException.class);
   }
 
   @Test
   void takeUnlessMethodThrowsNPEForNullArg() {
-    final Opt<Object> opt = Opt.of(new Object());
+    final Opt<Object> nonEmptyOpt = Opt.of(new Object());
+    final Opt<Object> emptyOpt = Opt.empty();
     final ThPredicate<Object, Throwable> block = null;
 
-    assertThatThrownBy(() -> opt.takeUnless(block))
+    assertThatThrownBy(() -> nonEmptyOpt.takeUnless(block))
+      .isInstanceOf(NullPointerException.class);
+    assertThatThrownBy(() -> emptyOpt.takeUnless(block))
       .isInstanceOf(NullPointerException.class);
   }
 
   @Test
   void orElseGetMethodThrowsNPEForNullArg() {
-    final Opt<Object> opt = Opt.of(new Object());
+    final Opt<Object> nonEmptyOpt = Opt.of(new Object());
+    final Opt<Object> emptyOpt = Opt.empty();
     final ThSupplier<Object, Throwable> block = null;
 
-    assertThatThrownBy(() -> opt.orElseGet(block))
+    assertThatThrownBy(() -> nonEmptyOpt.orElseGet(block))
+      .isInstanceOf(NullPointerException.class);
+    assertThatThrownBy(() -> emptyOpt.orElseGet(block))
       .isInstanceOf(NullPointerException.class);
   }
 
   @Test
   void orElseThrowMethodThrowsNPEForNullArg() {
-    final Opt<Object> opt = Opt.of(new Object());
+    final Opt<Object> nonEmptyOpt = Opt.of(new Object());
+    final Opt<Object> emptyOpt = Opt.empty();
     final ThSupplier<Throwable, Throwable> block = null;
 
-    assertThatThrownBy(() -> opt.orElseThrow(block))
+    assertThatThrownBy(() -> nonEmptyOpt.orElseThrow(block))
+      .isInstanceOf(NullPointerException.class);
+    assertThatThrownBy(() -> emptyOpt.orElseThrow(block))
       .isInstanceOf(NullPointerException.class);
   }
 
@@ -443,6 +467,18 @@ final class OptTest {
       .isTrue();
     assertThatThrownBy(() -> nullOpt.get())
       .isInstanceOf(NoSuchElementException.class);
+  }
+
+  @Test
+  void toStringMethod() {
+    final Object value = "abc123";
+    final Opt<Object> nonEmptyOpt = Opt.of(value);
+    final Opt<Object> emptyOpt = Opt.empty();
+
+    assertThat(nonEmptyOpt)
+      .hasToString("Opt[" + value + "]");
+    assertThat(emptyOpt)
+      .hasToString("Opt.empty");
   }
 
   //endregion

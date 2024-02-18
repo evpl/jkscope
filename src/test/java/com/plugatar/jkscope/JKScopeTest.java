@@ -526,6 +526,16 @@ final class JKScopeTest {
   @Test
   void runCatchingStaticMethod() {
     final AtomicBoolean sideEffect = new AtomicBoolean(false);
+    final ThRunnable<Throwable> block = () -> sideEffect.set(true);
+
+    JKScope.runCatching(block);
+    assertThat(sideEffect.get())
+      .isTrue();
+  }
+
+  @Test
+  void runCatchingStaticMethodThrowsException() {
+    final AtomicBoolean sideEffect = new AtomicBoolean(false);
     final ThRunnable<Throwable> block = () -> {
       sideEffect.set(true);
       throw new Throwable();
