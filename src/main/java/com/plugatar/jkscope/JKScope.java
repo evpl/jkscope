@@ -294,6 +294,27 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
   }
 
   /**
+   * Performs given function block on given {@link AutoCloseable} value and close this value.
+   * <pre>{@code
+   * with(new MyResource(), it -> System.out.println(it.getValue()));
+   * }</pre>
+   *
+   * @param value the value
+   * @param block the function block
+   * @param <V>   the type of the value
+   * @throws NullPointerException if {@code block} arg is null
+   */
+  static <V extends AutoCloseable> void withResource(final V value,
+                                                     final ThConsumer<? super V, ?> block) {
+    blockArgNotNull(block);
+    ((ThBiConsumer<V, ThConsumer<? super V, ?>, Throwable>) (v, b) -> {
+      try (final V resource = v) {
+        b.accept(resource);
+      }
+    }).asUnchecked().accept(value, block);
+  }
+
+  /**
    * Performs given function block on given values.
    * <pre>{@code
    * with("Hi", "Mark", (v1, v2) -> {
@@ -623,9 +644,9 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
   /**
    * Performs given function block on given value and returns result.
    * <pre>{@code
-   * String value = letWith("Hi", (str) -> {
-   *   System.out.println(str);
-   *   return "Oh " + str + " Mark";
+   * String value = letWith("Hi", it -> {
+   *   System.out.println(it);
+   *   return "Oh " + it + " Mark";
    * });
    * }</pre>
    *
@@ -640,6 +661,29 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
                           final ThFunction<? super V, ? extends R, ?> block) {
     blockArgNotNull(block);
     return block.asUnchecked().apply(value);
+  }
+
+  /**
+   * Performs given function block on {@link AutoCloseable} value, close this value and returns result.
+   * <pre>{@code
+   * String value = letWith(new MyResource(), it -> it.getValue());
+   * }</pre>
+   *
+   * @param value the value
+   * @param block the function block
+   * @param <V>   the type of the value
+   * @param <R>   the type of the result
+   * @return result
+   * @throws NullPointerException if {@code block} arg is null
+   */
+  static <V extends AutoCloseable, R> R letWithResource(final V value,
+                                                        final ThFunction<? super V, ? extends R, ?> block) {
+    blockArgNotNull(block);
+    return ((ThBiFunction<V, ThFunction<? super V, ? extends R, ?>, R, Throwable>) (v, b) -> {
+      try (final V resource = v) {
+        return b.apply(resource);
+      }
+    }).asUnchecked().apply(value, block);
   }
 
   /**

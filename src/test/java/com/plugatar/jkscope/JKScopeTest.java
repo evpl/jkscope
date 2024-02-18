@@ -328,6 +328,15 @@ final class JKScopeTest {
   }
 
   @Test
+  void withResourceMethodThrowsNPEForNullArg() {
+    final AutoCloseable value = new AutoCloseableImpl();
+    final ThConsumer<Object, Throwable> block = null;
+
+    assertThatThrownBy(() -> JKScope.withResource(value, block))
+      .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
   void with2ArgsStaticMethodThrowsNPEForNullArg() {
     final Object value1 = new Object();
     final Object value2 = new Object();
@@ -458,6 +467,15 @@ final class JKScopeTest {
     final ThFunction<Object, Object, Throwable> block = null;
 
     assertThatThrownBy(() -> JKScope.letWith(value, block))
+      .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void letWithResourceMethodThrowsNPEForNullArg() {
+    final AutoCloseable value = new AutoCloseableImpl();
+    final ThFunction<Object, Object, Throwable> block = null;
+
+    assertThatThrownBy(() -> JKScope.letWithResource(value, block))
       .isInstanceOf(NullPointerException.class);
   }
 
@@ -626,6 +644,31 @@ final class JKScopeTest {
 
     assertThatThrownBy(() -> JKScope.withDouble(value, block))
       .isSameAs(throwable);
+  }
+
+  @Test
+  void withResourceMethod() {
+    final AutoCloseableImpl value = new AutoCloseableImpl();
+    final AtomicReference<Object> valueRef = new AtomicReference<>();
+    final ThConsumer<Object, Throwable> block = arg -> valueRef.set(arg);
+
+    JKScope.withResource(value, block);
+    assertThat(valueRef.get())
+      .isSameAs(value);
+    assertThat(value.isClosed())
+      .isTrue();
+  }
+
+  @Test
+  void withResourceMethodThrowsException() {
+    final AutoCloseableImpl value = new AutoCloseableImpl();
+    final Throwable throwable = new Throwable();
+    final ThConsumer<Object, Throwable> block = arg -> { throw throwable; };
+
+    assertThatThrownBy(() -> JKScope.withResource(value, block))
+      .isSameAs(throwable);
+    assertThat(value.isClosed())
+      .isTrue();
   }
 
   @Test
@@ -1053,6 +1096,36 @@ final class JKScopeTest {
   }
 
   @Test
+  void letWithResourceMethod() {
+    final AutoCloseableImpl value = new AutoCloseableImpl();
+    final Object result = new Object();
+    final AtomicReference<Object> valueRef = new AtomicReference<>();
+    final ThFunction<Object, Object, Throwable> block = arg -> {
+      valueRef.set(arg);
+      return result;
+    };
+
+    assertThat(JKScope.letWithResource(value, block))
+      .isSameAs(result);
+    assertThat(valueRef.get())
+      .isSameAs(value);
+    assertThat(value.isClosed())
+      .isTrue();
+  }
+
+  @Test
+  void letWithResourceMethodThrowsException() {
+    final AutoCloseableImpl value = new AutoCloseableImpl();
+    final Throwable throwable = new Throwable();
+    final ThFunction<Object, Object, Throwable> block = arg -> { throw throwable; };
+
+    assertThatThrownBy(() -> JKScope.letWithResource(value, block))
+      .isSameAs(throwable);
+    assertThat(value.isClosed())
+      .isTrue();
+  }
+
+  @Test
   void letWith2ArgsStaticMethod() {
     final Object value1 = new Object();
     final Object value2 = new Object();
@@ -1125,5 +1198,18 @@ final class JKScopeTest {
   //endregion
 
   private static final class Impl implements JKScope<Impl> {
+  }
+
+  private static final class AutoCloseableImpl implements AutoCloseable {
+    private boolean isClosed = false;
+
+    @Override
+    public void close() throws Exception {
+      this.isClosed = true;
+    }
+
+    public boolean isClosed() {
+      return this.isClosed;
+    }
   }
 }
