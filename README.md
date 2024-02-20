@@ -37,8 +37,8 @@ Java scope functions inspired by Kotlin
 
 ## Motivation
 
-Inspired by the [Kotlin scope function](https://kotlinlang.org/docs/scope-functions.html) I want to reduce the number of
-lines of my Java code and make this code more readable.
+Inspired by the [Kotlin scope function](https://kotlinlang.org/docs/scope-functions.html) I want to make my Java code
+more structured and readable.
 
 ## How to use
 
