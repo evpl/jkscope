@@ -30,8 +30,10 @@ Java scope functions inspired by Kotlin
   * [Unchecked functions](#unchecked-functions)
   * [Examples](#examples)
     * [Collection initialization](#collection-initialization)
+    * [Argument in a method chain](#argument-in-a-method-chain)
     * [Nth Fibonacci number](#nth-fibonacci-number)
     * [Method argument processing](#method-argument-processing)
+    * [Safe resources](#safe-resources)
 
 ## Motivation
 
@@ -217,11 +219,11 @@ The `Opt` monad is similar in meaning to Java `Optional`, but allows the null va
 `Opt` monad contains some `Optional` methods and scope functions methods:
 
 ```
-String result = Opt.of("value").takeIf(it -> it.length() > 10).orElse("");
+String result = Opt.of(value).takeIf(it -> it.length() > 10).orElse("");
 
-String result = Opt.of("value").takeIf(it -> it.length() > 10).orElseGet(() -> "");
+String result = Opt.of(value).takeNonNull().orElseGet(() -> "");
 
-String result = Opt.of("value").takeIf(it -> it.length() > 10).orElseThrow(() -> new IllegalArgumentException());
+String result = Opt.of(value).takeIf(it -> it.length() > 10).orElseThrow(() -> new IllegalArgumentException());
 ```
 
 ### Unchecked functions
@@ -250,6 +252,20 @@ List<String> list = let(new ArrayList<>(), it -> {
 });
 ```
 
+#### Argument in a method chain
+
+```
+new MyBuilder()
+  .setFirst("first")
+  .setSecond("second")
+  .setThird(let(() -> {
+    //...
+    return "third";
+  }))
+  .setFourth("fourth")
+  .build()
+```
+
 #### Nth Fibonacci number
 
 ```
@@ -270,4 +286,16 @@ public static String checkNonNullNonEmptyStr(String value) {
     .takeUnless(String::isEmpty).throwIfEmpty(IllegalArgumentException::new)
     .get();
 }
+```
+
+#### Safe resources
+
+```
+class MyResource implements AutoCloseable {
+  //...
+}
+
+withResource(new MyResource(), it -> {
+  //...
+});
 ```
