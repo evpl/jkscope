@@ -1,6 +1,6 @@
 # JKScope
 
-[![Last version](https://img.shields.io/badge/last_version-2.1-blue)](https://github.com/evpl/jkscope)
+[![Awesome](https://awesome.re/badge.svg)](https://github.com/akullpp/awesome-java/tree/master#utility)
 [![Maven Central](https://img.shields.io/maven-central/v/com.plugatar.jkscope/jkscope)](https://central.sonatype.com/artifact/com.plugatar.jkscope/jkscope)
 [![Javadoc](https://javadoc.io/badge2/com.plugatar.jkscope/jkscope/javadoc.svg?color=blue)](https://javadoc.io/doc/com.plugatar.jkscope/jkscope)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
@@ -100,7 +100,7 @@ new MyObject().takeIf(it -> it.getInt() > 10).takeUnless(it -> it.getInt() > 20)
 
 #### `letOut`
 
-`takeIf` method performs given function block on this object and returns result.
+`letOut` method performs given function block on this object and returns result.
 
 ```
 Integer value = new MyObject().letOut(it -> it.getInt());
@@ -108,7 +108,7 @@ Integer value = new MyObject().letOut(it -> it.getInt());
 
 #### `letOpt`
 
-`takeIf` method performs given function block on this object and returns `Opt` monad of result.
+`letOpt` method performs given function block on this object and returns `Opt` monad of result.
 
 ```
 new MyObject().letOpt(it -> it.getInt()).takeIf(it -> it > 10).let(it -> System.out.println(it));
