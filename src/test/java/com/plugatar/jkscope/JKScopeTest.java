@@ -54,20 +54,20 @@ final class JKScopeTest {
   //region NPE check for instance methods
 
   @Test
-  void letInstanceMethodThrowsNPEForNullArg() {
-    final JKScope<?> jkScope = new Impl();
-    final ThConsumer<Object, Throwable> block = null;
-
-    assertThatThrownBy(() -> jkScope.let(block))
-      .isInstanceOf(NullPointerException.class);
-  }
-
-  @Test
   void alsoInstanceMethodThrowsNPEForNullArg() {
     final JKScope<?> jkScope = new Impl();
     final ThConsumer<Object, Throwable> block = null;
 
     assertThatThrownBy(() -> jkScope.also(block))
+      .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void letItInstanceMethodThrowsNPEForNullArg() {
+    final JKScope<?> jkScope = new Impl();
+    final ThConsumer<Object, Throwable> block = null;
+
+    assertThatThrownBy(() -> jkScope.letIt(block))
       .isInstanceOf(NullPointerException.class);
   }
 
@@ -112,28 +112,6 @@ final class JKScopeTest {
   //region Logic check for instance methods
 
   @Test
-  void letInstanceMethod() {
-    final JKScope<?> jkScope = new Impl();
-    final AtomicReference<Object> thisRef = new AtomicReference<>();
-    final ThConsumer<Object, Throwable> block = arg -> thisRef.set(arg);
-
-    assertThat(jkScope.let(block))
-      .isSameAs(jkScope);
-    assertThat(thisRef.get())
-      .isSameAs(jkScope);
-  }
-
-  @Test
-  void letInstanceMethodThrowsException() {
-    final JKScope<?> jkScope = new Impl();
-    final Throwable throwable = new Throwable();
-    final ThConsumer<Object, Throwable> block = arg -> { throw throwable; };
-
-    assertThatThrownBy(() -> jkScope.let(block))
-      .isSameAs(throwable);
-  }
-
-  @Test
   void alsoInstanceMethod() {
     final JKScope<?> jkScope = new Impl();
     final AtomicReference<Object> thisRef = new AtomicReference<>();
@@ -152,6 +130,28 @@ final class JKScopeTest {
     final ThConsumer<Object, Throwable> block = arg -> { throw throwable; };
 
     assertThatThrownBy(() -> jkScope.also(block))
+      .isSameAs(throwable);
+  }
+
+  @Test
+  void letItInstanceMethod() {
+    final JKScope<?> jkScope = new Impl();
+    final AtomicReference<Object> thisRef = new AtomicReference<>();
+    final ThConsumer<Object, Throwable> block = arg -> thisRef.set(arg);
+
+    assertThat(jkScope.letIt(block))
+      .isSameAs(jkScope);
+    assertThat(thisRef.get())
+      .isSameAs(jkScope);
+  }
+
+  @Test
+  void letItInstanceMethodThrowsException() {
+    final JKScope<?> jkScope = new Impl();
+    final Throwable throwable = new Throwable();
+    final ThConsumer<Object, Throwable> block = arg -> { throw throwable; };
+
+    assertThatThrownBy(() -> jkScope.letIt(block))
       .isSameAs(throwable);
   }
 

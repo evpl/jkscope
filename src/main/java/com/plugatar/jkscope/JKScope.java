@@ -45,8 +45,8 @@ import static com.plugatar.jkscope.Utils.uncheckedCast;
 /**
  * Implement this interface to use these methods:
  * <ul>
- * <li>{@link #let(ThConsumer)}</li>
  * <li>{@link #also(ThConsumer)}</li>
+ * <li>{@link #letIt(ThConsumer)}</li>
  * <li>{@link #letOut(ThFunction)}</li>
  * <li>{@link #letOpt(ThFunction)}</li>
  * <li>{@link #takeIf(ThPredicate)}</li>
@@ -66,7 +66,7 @@ import static com.plugatar.jkscope.Utils.uncheckedCast;
  *   }
  * }
  *
- * new MyClass().also(it -> it.setIntValue(20)).takeIf(it -> it.getIntValue() > 10).let(it -> System.out.println("ok"));
+ * new MyClass().also(it -> it.setIntValue(20)).takeIf(it -> it.getIntValue() > 10).letIt(it -> System.out.println("ok"));
  * }</pre>
  * Use static methods anywhere:
  * <ul>
@@ -106,7 +106,7 @@ import static com.plugatar.jkscope.Utils.uncheckedCast;
  *   it.put("value2", 2);
  * };
  *
- * let("value").takeUnless(it -> it.isEmpty()).takeIf(it -> it.length() < 100).let(it -> System.out.println(it));
+ * let("value").takeUnless(it -> it.isEmpty()).takeIf(it -> it.length() < 100).letIt(it -> System.out.println(it));
  *
  * int value = letIntRec(10, (n, func) -> {
  *   if (n < 2) {
@@ -125,14 +125,14 @@ import static com.plugatar.jkscope.Utils.uncheckedCast;
 public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
 
   @Override
-  default V let(final ThConsumer<? super V, ?> block) {
+  default V also(final ThConsumer<? super V, ?> block) {
     blockArgNotNull(block);
     block.asUnchecked().accept(uncheckedCast(this));
     return uncheckedCast(this);
   }
 
   @Override
-  default V also(final ThConsumer<? super V, ?> block) {
+  default V letIt(final ThConsumer<? super V, ?> block) {
     blockArgNotNull(block);
     block.asUnchecked().accept(uncheckedCast(this));
     return uncheckedCast(this);
@@ -366,7 +366,7 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
   /**
    * Returns {@link Opt} instance of given value, {@code null} is also considered as a value.
    * <pre>{@code
-   * let(value).takeNonNull().takeUnless(it -> it.isEmpty()).takeIf(it -> it.length() < 100).let(it -> System.out.println(it));
+   * let(value).takeNonNull().takeUnless(it -> it.isEmpty()).takeIf(it -> it.length() < 100).letIt(it -> System.out.println(it));
    * }</pre>
    *
    * @param value the value
@@ -381,7 +381,7 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
    * Returns {@link Opt} instance of given value or empty {@link Opt} instance if given value is null. Equivalent to
    * calling a chain of methods: {@code let(value).takeNonNull()}.
    * <pre>{@code
-   * letNonNull(value).takeUnless(it -> it.isEmpty()).takeIf(it -> it.length() < 100).let(it -> System.out.println(it));
+   * letNonNull(value).takeUnless(it -> it.isEmpty()).takeIf(it -> it.length() < 100).letIt(it -> System.out.println(it));
    * }</pre>
    *
    * @param value the value

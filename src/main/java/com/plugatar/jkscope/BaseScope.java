@@ -31,20 +31,7 @@ interface BaseScope<V, T extends BaseScope<V, T>> {
 
   /**
    * Performs given function on the value if value is present and returns this value. Similar to
-   * {@link #also(ThConsumer)} method.
-   * <pre>{@code
-   * MyObj obj = new MyObj().let(it -> System.out.println(it.getString()));
-   * }</pre>
-   *
-   * @param block the function block
-   * @return value
-   * @throws NullPointerException if {@code block} arg is null
-   */
-  T let(ThConsumer<? super V, ?> block);
-
-  /**
-   * Performs given function on the value if value is present and returns this value. Similar to
-   * {@link #let(ThConsumer)} method.
+   * {@link #letIt(ThConsumer)} method.
    * <pre>{@code
    * MyObj obj = new MyObj().also(it -> System.out.println(it.getString()));
    * }</pre>
@@ -54,6 +41,19 @@ interface BaseScope<V, T extends BaseScope<V, T>> {
    * @throws NullPointerException if {@code block} arg is null
    */
   T also(ThConsumer<? super V, ?> block);
+
+  /**
+   * Performs given function on the value if value is present and returns this value. Similar to
+   * {@link #also(ThConsumer)} method.
+   * <pre>{@code
+   * MyObj obj = new MyObj().letIt(it -> System.out.println(it.getString()));
+   * }</pre>
+   *
+   * @param block the function block
+   * @return value
+   * @throws NullPointerException if {@code block} arg is null
+   */
+  T letIt(ThConsumer<? super V, ?> block);
 
   /**
    * Performs given function block if value is present on this value and returns result.
@@ -72,7 +72,7 @@ interface BaseScope<V, T extends BaseScope<V, T>> {
   /**
    * Performs given function block if value is present on this value and returns {@link Opt} instance of result.
    * <pre>{@code
-   * new MyObj().letOpt(it -> it.getString()).takeIf(it -> !it.isEmpty()).let(it -> System.out.println(it));
+   * new MyObj().letOpt(it -> it.getString()).takeIf(it -> !it.isEmpty()).letIt(it -> System.out.println(it));
    * }</pre>
    *
    * @param block the function block
@@ -86,7 +86,7 @@ interface BaseScope<V, T extends BaseScope<V, T>> {
    * Performs given function on the value if value is present and returns {@link Opt} instance of value if the condition
    * is met or empty {@link Opt} instance if the condition is not met.
    * <pre>{@code
-   * new MyObj().takeIf(it -> !it.getString().isEmpty()).let(it -> System.out.println(it.getString()));
+   * new MyObj().takeIf(it -> !it.getString().isEmpty()).letIt(it -> System.out.println(it.getString()));
    * }</pre>
    *
    * @param block the function block
@@ -100,7 +100,7 @@ interface BaseScope<V, T extends BaseScope<V, T>> {
    * Performs given function on the value if value is present and returns {@link Opt} instance of value if the condition
    * is not met or empty {@link Opt} instance if the condition is met.
    * <pre>{@code
-   * new MyObj().takeUnless(it -> it.getString().isEmpty()).let(it -> System.out.println(it.getString()));
+   * new MyObj().takeUnless(it -> it.getString().isEmpty()).letIt(it -> System.out.println(it.getString()));
    * }</pre>
    *
    * @param block the function block

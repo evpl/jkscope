@@ -1,9 +1,9 @@
 # JKScope
 
-[![Awesome](https://awesome.re/badge.svg)](https://github.com/akullpp/awesome-java/tree/master#utility)
 [![Maven Central](https://img.shields.io/maven-central/v/com.plugatar.jkscope/jkscope)](https://central.sonatype.com/artifact/com.plugatar.jkscope/jkscope)
 [![Javadoc](https://javadoc.io/badge2/com.plugatar.jkscope/jkscope/javadoc.svg?color=blue)](https://javadoc.io/doc/com.plugatar.jkscope/jkscope)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Mentioned in Awesome Java](https://awesome.re/mentioned-badge.svg)](https://github.com/akullpp/awesome-java)
 
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/evpl/jkscope/build.yml?branch=main)](https://github.com/evpl/jkscope)
 [![Lines](https://sloc.xyz/github/evpl/jkscope/?category=lines)](https://github.com/evpl/jkscope)
@@ -18,7 +18,7 @@ Java scope functions inspired by Kotlin
 * [How to use](#how-to-use)
 * [Docs](#docs)
   * [JKScope interface methods](#jkscope-interface-methods)
-    * [`let` and `also`](#let-and-also)
+    * [`letIt` and `also`](#letit-and-also)
     * [`takeIf` and `takeUnless`](#takeif-and-takeunless)
     * [`letOut`](#letout)
     * [`letOpt`](#letopt)
@@ -75,13 +75,13 @@ You need to implement `JKScope` interface to use these methods.
 class MyObject implements JKScope<MyObject> { }
 ```
 
-#### `let` and `also`
+#### `letIt` and `also`
 
 Both methods are the same and differ in the name only. Methods perform the function block on this object and return this
 object.
 
 ```
-MyDTO myDTO = new MyDTO().let(it -> {
+MyDTO myDTO = new MyDTO().letIt(it -> {
   it.setProperty("value");
   it.setAnother("another value");
 });
@@ -95,7 +95,7 @@ MyResource myResource = new MyResource().also(it -> it.init());
 met, or it returns empty `Opt` instance if the condition is not met. And `takeUnless` method has reverse logic.
 
 ```
-new MyObject().takeIf(it -> it.getInt() > 10).takeUnless(it -> it.getInt() > 20).let(it -> System.out.println(it));
+new MyObject().takeIf(it -> it.getInt() > 10).takeUnless(it -> it.getInt() > 20).letIt(it -> System.out.println(it));
 ```
 
 #### `letOut`
@@ -111,7 +111,7 @@ Integer value = new MyObject().letOut(it -> it.getInt());
 `letOpt` method performs given function block on this object and returns `Opt` monad of result.
 
 ```
-new MyObject().letOpt(it -> it.getInt()).takeIf(it -> it > 10).let(it -> System.out.println(it));
+new MyObject().letOpt(it -> it.getInt()).takeIf(it -> it > 10).letIt(it -> System.out.println(it));
 ```
 
 ### JKScope static methods
@@ -169,9 +169,9 @@ with(value1, value2, (v1, v2) -> {
 empty `Opt` instance if given value is null.
 
 ```
-let(value).takeNonNull().takeUnless(it -> it.isEmpty()).takeIf(it -> it.length() < 100).let(it -> System.out.println(it));
+let(value).takeNonNull().takeUnless(it -> it.isEmpty()).takeIf(it -> it.length() < 100).letIt(it -> System.out.println(it));
 
-letNonNull(value).takeUnless(it -> it.isEmpty()).takeIf(it -> it.length() < 100).let(it -> System.out.println(it));
+letNonNull(value).takeUnless(it -> it.isEmpty()).takeIf(it -> it.length() < 100).letIt(it -> System.out.println(it));
 ```
 
 `let`, `letInt`, `letLong` and `letDouble` returns result of function block.

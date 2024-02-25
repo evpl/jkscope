@@ -35,18 +35,6 @@ final class OptTest {
   //region NPE check for instance methods
 
   @Test
-  void letMethodThrowsNPEForNullArg() {
-    final Opt<Object> nonEmptyOpt = Opt.of(new Object());
-    final Opt<Object> emptyOpt = Opt.empty();
-    final ThConsumer<Object, Throwable> block = null;
-
-    assertThatThrownBy(() -> nonEmptyOpt.let(block))
-      .isInstanceOf(NullPointerException.class);
-    assertThatThrownBy(() -> emptyOpt.let(block))
-      .isInstanceOf(NullPointerException.class);
-  }
-
-  @Test
   void alsoMethodThrowsNPEForNullArg() {
     final Opt<Object> nonEmptyOpt = Opt.of(new Object());
     final Opt<Object> emptyOpt = Opt.empty();
@@ -55,6 +43,18 @@ final class OptTest {
     assertThatThrownBy(() -> nonEmptyOpt.also(block))
       .isInstanceOf(NullPointerException.class);
     assertThatThrownBy(() -> emptyOpt.also(block))
+      .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void letItMethodThrowsNPEForNullArg() {
+    final Opt<Object> nonEmptyOpt = Opt.of(new Object());
+    final Opt<Object> emptyOpt = Opt.empty();
+    final ThConsumer<Object, Throwable> block = null;
+
+    assertThatThrownBy(() -> nonEmptyOpt.letIt(block))
+      .isInstanceOf(NullPointerException.class);
+    assertThatThrownBy(() -> emptyOpt.letIt(block))
       .isInstanceOf(NullPointerException.class);
   }
 
@@ -135,30 +135,6 @@ final class OptTest {
   //region Logic check for instance methods
 
   @Test
-  void letMethod() {
-    final Object value = new Object();
-    final Opt<Object> opt = Opt.of(value);
-    final AtomicReference<Object> valueRef = new AtomicReference<>();
-    final ThConsumer<Object, Throwable> block = arg -> valueRef.set(arg);
-
-    assertThat(opt.let(block))
-      .isSameAs(opt);
-    assertThat(valueRef.get())
-      .isSameAs(value);
-  }
-
-  @Test
-  void letMethodThrowsException() {
-    final Object value = new Object();
-    final Opt<Object> opt = Opt.of(value);
-    final Throwable throwable = new Throwable();
-    final ThConsumer<Object, Throwable> block = arg -> { throw throwable; };
-
-    assertThatThrownBy(() -> opt.let(block))
-      .isSameAs(throwable);
-  }
-
-  @Test
   void alsoMethod() {
     final Object value = new Object();
     final Opt<Object> opt = Opt.of(value);
@@ -179,6 +155,30 @@ final class OptTest {
     final ThConsumer<Object, Throwable> block = arg -> { throw throwable; };
 
     assertThatThrownBy(() -> opt.also(block))
+      .isSameAs(throwable);
+  }
+
+  @Test
+  void letItMethod() {
+    final Object value = new Object();
+    final Opt<Object> opt = Opt.of(value);
+    final AtomicReference<Object> valueRef = new AtomicReference<>();
+    final ThConsumer<Object, Throwable> block = arg -> valueRef.set(arg);
+
+    assertThat(opt.letIt(block))
+      .isSameAs(opt);
+    assertThat(valueRef.get())
+      .isSameAs(value);
+  }
+
+  @Test
+  void letItMethodThrowsException() {
+    final Object value = new Object();
+    final Opt<Object> opt = Opt.of(value);
+    final Throwable throwable = new Throwable();
+    final ThConsumer<Object, Throwable> block = arg -> { throw throwable; };
+
+    assertThatThrownBy(() -> opt.letIt(block))
       .isSameAs(throwable);
   }
 

@@ -163,14 +163,14 @@ public interface Opt<V> extends BaseScope<V, Opt<V>> {
     }
 
     @Override
-    public Opt<V> let(final ThConsumer<? super V, ?> block) {
+    public Opt<V> also(final ThConsumer<? super V, ?> block) {
       blockArgNotNull(block);
       block.asUnchecked().accept(this.value);
       return this;
     }
 
     @Override
-    public Opt<V> also(final ThConsumer<? super V, ?> block) {
+    public Opt<V> letIt(final ThConsumer<? super V, ?> block) {
       blockArgNotNull(block);
       block.asUnchecked().accept(this.value);
       return this;
@@ -276,13 +276,13 @@ public interface Opt<V> extends BaseScope<V, Opt<V>> {
     }
 
     @Override
-    public Opt<V> let(final ThConsumer<? super V, ?> block) {
+    public Opt<V> also(final ThConsumer<? super V, ?> block) {
       blockArgNotNull(block);
       return this;
     }
 
     @Override
-    public Opt<V> also(final ThConsumer<? super V, ?> block) {
+    public Opt<V> letIt(final ThConsumer<? super V, ?> block) {
       blockArgNotNull(block);
       return this;
     }
