@@ -34,6 +34,9 @@ import com.plugatar.jkscope.function.ThLongToLongFunction;
 import com.plugatar.jkscope.function.ThPredicate;
 import com.plugatar.jkscope.function.ThRunnable;
 import com.plugatar.jkscope.function.ThSupplier;
+import com.plugatar.jkscope.function.ThToDoubleFunction;
+import com.plugatar.jkscope.function.ThToIntFunction;
+import com.plugatar.jkscope.function.ThToLongFunction;
 import com.plugatar.jkscope.function.ThTriConsumer;
 import com.plugatar.jkscope.function.ThTriFunction;
 
@@ -95,6 +98,9 @@ import static com.plugatar.jkscope.Utils.uncheckedCast;
  * <li>{@link #letLongRec(long, ThLongObjToLongFunction)}</li>
  * <li>{@link #letDoubleRec(double, ThDoubleObjToDoubleFunction)}</li>
  * <li>{@link #letWith(Object, ThFunction)}</li>
+ * <li>{@link #letIntWith(Object, ThToIntFunction)}</li>
+ * <li>{@link #letLongWith(Object, ThToLongFunction)}</li>
+ * <li>{@link #letDoubleWith(Object, ThToDoubleFunction)}</li>
  * <li>{@link #letWithResource(AutoCloseable, ThFunction)}</li>
  * <li>{@link #letWith(Object, Object, ThBiFunction)}</li>
  * <li>{@link #letWith(Object, Object, Object, ThTriFunction)}</li>
@@ -661,6 +667,66 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
    */
   static <V, R> R letWith(final V value,
                           final ThFunction<? super V, ? extends R, ?> block) {
+    blockArgNotNull(block);
+    return block.asUnchecked().apply(value);
+  }
+
+  /**
+   * Performs given function block on given value and returns result.
+   * <pre>{@code
+   * int value = letWith("1234", it -> {
+   *   System.out.println(it);
+   *   return Integer.parseInt(it);
+   * });
+   * }</pre>
+   *
+   * @param value the value
+   * @param block the function block
+   * @param <V>   the type of the value
+   * @return result
+   */
+  static <V> int letIntWith(final V value,
+                            final ThToIntFunction<? super V, ?> block) {
+    blockArgNotNull(block);
+    return block.asUnchecked().apply(value);
+  }
+
+  /**
+   * Performs given function block on given value and returns result.
+   * <pre>{@code
+   * long value = letWith("1234", it -> {
+   *   System.out.println(it);
+   *   return Long.parseLong(it);
+   * });
+   * }</pre>
+   *
+   * @param value the value
+   * @param block the function block
+   * @param <V>   the type of the value
+   * @return result
+   */
+  static <V> long letLongWith(final V value,
+                              final ThToLongFunction<? super V, ?> block) {
+    blockArgNotNull(block);
+    return block.asUnchecked().apply(value);
+  }
+
+  /**
+   * Performs given function block on given value and returns result.
+   * <pre>{@code
+   * double value = letWith("1234.0", it -> {
+   *   System.out.println(it);
+   *   return Double.parseLong(it);
+   * });
+   * }</pre>
+   *
+   * @param value the value
+   * @param block the function block
+   * @param <V>   the type of the value
+   * @return result
+   */
+  static <V> double letDoubleWith(final V value,
+                                  final ThToDoubleFunction<? super V, ?> block) {
     blockArgNotNull(block);
     return block.asUnchecked().apply(value);
   }

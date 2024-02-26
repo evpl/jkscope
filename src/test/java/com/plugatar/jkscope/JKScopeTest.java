@@ -34,6 +34,9 @@ import com.plugatar.jkscope.function.ThLongToLongFunction;
 import com.plugatar.jkscope.function.ThPredicate;
 import com.plugatar.jkscope.function.ThRunnable;
 import com.plugatar.jkscope.function.ThSupplier;
+import com.plugatar.jkscope.function.ThToDoubleFunction;
+import com.plugatar.jkscope.function.ThToIntFunction;
+import com.plugatar.jkscope.function.ThToLongFunction;
 import com.plugatar.jkscope.function.ThTriConsumer;
 import com.plugatar.jkscope.function.ThTriFunction;
 import org.junit.jupiter.api.Test;
@@ -467,6 +470,33 @@ final class JKScopeTest {
     final ThFunction<Object, Object, Throwable> block = null;
 
     assertThatThrownBy(() -> JKScope.letWith(value, block))
+      .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void letIntWithStaticMethodThrowsNPEForNullArg() {
+    final Object value = new Object();
+    final ThToIntFunction<Object, Throwable> block = null;
+
+    assertThatThrownBy(() -> JKScope.letIntWith(value, block))
+      .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void letLongWithStaticMethodThrowsNPEForNullArg() {
+    final Object value = new Object();
+    final ThToLongFunction<Object, Throwable> block = null;
+
+    assertThatThrownBy(() -> JKScope.letLongWith(value, block))
+      .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void letDoubleWithStaticMethodThrowsNPEForNullArg() {
+    final Object value = new Object();
+    final ThToDoubleFunction<Object, Throwable> block = null;
+
+    assertThatThrownBy(() -> JKScope.letDoubleWith(value, block))
       .isInstanceOf(NullPointerException.class);
   }
 
@@ -1102,6 +1132,84 @@ final class JKScopeTest {
     final ThFunction<Object, Object, Throwable> block = arg -> { throw throwable; };
 
     assertThatThrownBy(() -> JKScope.letWith(value, block))
+      .isSameAs(throwable);
+  }
+
+  @Test
+  void letIntWithStaticMethod() {
+    final Object value = new Object();
+    final int result = 111;
+    final AtomicReference<Object> valueRef = new AtomicReference<>();
+    final ThToIntFunction<Object, Throwable> block = arg -> {
+      valueRef.set(arg);
+      return result;
+    };
+
+    assertThat(JKScope.letIntWith(value, block))
+      .isEqualTo(result);
+    assertThat(valueRef.get())
+      .isSameAs(value);
+  }
+
+  @Test
+  void letIntWithStaticMethodThrowsException() {
+    final Object value = new Object();
+    final Throwable throwable = new Throwable();
+    final ThToIntFunction<Object, Throwable> block = arg -> { throw throwable; };
+
+    assertThatThrownBy(() -> JKScope.letIntWith(value, block))
+      .isSameAs(throwable);
+  }
+
+  @Test
+  void letLongWithStaticMethod() {
+    final Object value = new Object();
+    final long result = 111L;
+    final AtomicReference<Object> valueRef = new AtomicReference<>();
+    final ThToLongFunction<Object, Throwable> block = arg -> {
+      valueRef.set(arg);
+      return result;
+    };
+
+    assertThat(JKScope.letLongWith(value, block))
+      .isEqualTo(result);
+    assertThat(valueRef.get())
+      .isSameAs(value);
+  }
+
+  @Test
+  void letLongWithStaticMethodThrowsException() {
+    final Object value = new Object();
+    final Throwable throwable = new Throwable();
+    final ThToLongFunction<Object, Throwable> block = arg -> { throw throwable; };
+
+    assertThatThrownBy(() -> JKScope.letLongWith(value, block))
+      .isSameAs(throwable);
+  }
+
+  @Test
+  void letDoubleWithStaticMethod() {
+    final Object value = new Object();
+    final double result = 111.0;
+    final AtomicReference<Object> valueRef = new AtomicReference<>();
+    final ThToDoubleFunction<Object, Throwable> block = arg -> {
+      valueRef.set(arg);
+      return result;
+    };
+
+    assertThat(JKScope.letDoubleWith(value, block))
+      .isEqualTo(result);
+    assertThat(valueRef.get())
+      .isSameAs(value);
+  }
+
+  @Test
+  void letDoubleWithStaticMethodThrowsException() {
+    final Object value = new Object();
+    final Throwable throwable = new Throwable();
+    final ThToDoubleFunction<Object, Throwable> block = arg -> { throw throwable; };
+
+    assertThatThrownBy(() -> JKScope.letDoubleWith(value, block))
       .isSameAs(throwable);
   }
 
