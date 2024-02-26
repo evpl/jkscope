@@ -52,7 +52,7 @@ Maven:
 <dependency>
   <groupId>com.plugatar.jkscope</groupId>
   <artifactId>jkscope</artifactId>
-  <version>2.1</version>
+  <version>2.2</version>
   <scope>compile</scope>
 </dependency>
 ```
@@ -61,7 +61,7 @@ Gradle:
 
 ```groovy
 dependencies {
-    implementation 'com.plugatar.jkscope:jkscope:2.1'
+    implementation 'com.plugatar.jkscope:jkscope:2.2'
 }
 ```
 
@@ -204,7 +204,8 @@ int value = letIntRec(10, (n, func) -> {
 });
 ```
 
-`letWith` methods accept values and returning the result of function block.
+`letWith`, `letIntWith`, `letLongWith`, `letDoubleWith` methods accept values and returning the result of function
+block.
 
 ```
 int value = letWith("42", it -> Integer.valueOf(it));
