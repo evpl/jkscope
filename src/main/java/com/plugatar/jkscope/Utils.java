@@ -19,6 +19,7 @@ package com.plugatar.jkscope;
  * Utility methods.
  */
 final class Utils {
+  static final Object UNINITIALIZED_VALUE = new Object();
 
   /**
    * Ctor.

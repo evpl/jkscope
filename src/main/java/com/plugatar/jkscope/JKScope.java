@@ -104,6 +104,10 @@ import static com.plugatar.jkscope.Utils.uncheckedCast;
  * <li>{@link #letWithResource(AutoCloseable, ThFunction)}</li>
  * <li>{@link #letWith(Object, Object, ThBiFunction)}</li>
  * <li>{@link #letWith(Object, Object, Object, ThTriFunction)}</li>
+ * <li>{@link #lazy(ThSupplier)}</li>
+ * <li>{@link #lazy(Object, ThSupplier)}</li>
+ * <li>{@link #lazy(Lazy.ThreadSafetyMode, ThSupplier)}</li>
+ * <li>{@link #lazyOfValue(Object)}</li>
  * </ul>
  * Some examples:
  * <pre>{@code
@@ -808,5 +812,61 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
                                    final ThTriFunction<? super V1, ? super V2, ? super V3, ? extends R, ?> block) {
     blockArgNotNull(block);
     return block.asUnchecked().apply(value1, value2, value3);
+  }
+
+  /**
+   * Returns a new {@link Lazy} instance that uses the specified initialization function and the
+   * {@link Lazy.ThreadSafetyMode#SYNCHRONIZED} thread-safety mode. The returned instance uses itself to synchronize
+   * on.
+   *
+   * @param initializer the value initializer
+   * @param <V>         the type of the value
+   * @return new {@link Lazy} instance
+   * @throws NullPointerException if {@code initializer} arg is null
+   */
+  static <V> Lazy<V> lazy(final ThSupplier<? extends V, ?> initializer) {
+    return Lazy.of(initializer);
+  }
+
+  /**
+   * Returns a new {@link Lazy} instance that uses the specified initialization function and the
+   * {@link Lazy.ThreadSafetyMode#SYNCHRONIZED} thread-safety mode. The returned instance uses the specified lock object
+   * to synchronize on.
+   *
+   * @param lock        the lock object
+   * @param initializer the value initializer
+   * @param <V>         the type of the value
+   * @return new {@link Lazy} instance
+   * @throws NullPointerException if {@code lock} or {@code initializer} arg is null
+   */
+  static <V> Lazy<V> lazy(final Object lock,
+                          final ThSupplier<? extends V, ?> initializer) {
+    return Lazy.of(lock, initializer);
+  }
+
+  /**
+   * Returns a new {@link Lazy} instance that uses the specified initialization function and thread-safety mode. For
+   * {@link Lazy.ThreadSafetyMode#SYNCHRONIZED} the returned instance uses itself to synchronize on.
+   *
+   * @param threadSafetyMode the thread safety mode
+   * @param initializer      the value initializer
+   * @param <V>              the type of the value
+   * @return new {@link Lazy} instance
+   * @throws NullPointerException if {@code threadSafetyMode} or {@code initializer} arg is null
+   */
+  static <V> Lazy<V> lazy(final Lazy.ThreadSafetyMode threadSafetyMode,
+                          final ThSupplier<? extends V, ?> initializer) {
+    return Lazy.of(threadSafetyMode, initializer);
+  }
+
+  /**
+   * Returns a new {@link Lazy} instance that is already initialized with the specified value.
+   *
+   * @param value the value
+   * @param <V>   the type of the value
+   * @return new {@link Lazy} instance
+   */
+  static <V> Lazy<V> lazyOfValue(final V value) {
+    return Lazy.ofValue(value);
   }
 }

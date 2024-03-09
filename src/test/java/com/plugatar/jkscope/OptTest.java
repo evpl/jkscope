@@ -24,6 +24,8 @@ import org.junit.jupiter.api.Test;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static com.plugatar.jkscope.SerializationUtils.deserialize;
+import static com.plugatar.jkscope.SerializationUtils.serialize;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -277,17 +279,17 @@ final class OptTest {
     final Object value = new Object();
     final Opt<Object> opt = Opt.of(value);
     final AtomicReference<Object> valueRef = new AtomicReference<>();
-    final ThPredicate<Object, Throwable> block1 = arg -> {
+    final ThPredicate<Object, Throwable> blockFalse = arg -> {
       valueRef.set(arg);
       return false;
     };
-    final ThPredicate<Object, Throwable> block2 = arg -> true;
+    final ThPredicate<Object, Throwable> blockTrue = arg -> true;
 
-    assertThat(opt.takeUnless(block1).get())
+    assertThat(opt.takeUnless(blockFalse).get())
       .isSameAs(value);
     assertThat(valueRef.get())
       .isSameAs(value);
-    assertThat(opt.takeUnless(block2).isEmpty())
+    assertThat(opt.takeUnless(blockTrue).isEmpty())
       .isTrue();
   }
 
@@ -420,6 +422,23 @@ final class OptTest {
       .containsSame(value);
     assertThat(emptyOpt.asOptional())
       .isEmpty();
+  }
+
+  @Test
+  void serializationAndDeserialization() throws Exception {
+    final Object value = "some value";
+    final Opt<Object> nonEmptyOpt = Opt.of(value);
+    final Opt<Object> emptyOpt = Opt.empty();
+
+    assertThat(deserialize(serialize(nonEmptyOpt)))
+      .isInstanceOf(Opt.Of.class)
+      .extracting(obj -> ((Opt.Of<?>) obj).get())
+      .isEqualTo(value);
+
+    assertThat(deserialize(serialize(emptyOpt)))
+      .isInstanceOf(Opt.Empty.class)
+      .extracting(obj -> ((Opt.Empty<?>) obj).isEmpty())
+      .isEqualTo(true);
   }
 
   //endregion

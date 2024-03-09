@@ -214,17 +214,17 @@ final class JKScopeTest {
   void takeIfInstanceMethod() {
     final JKScope<?> jkScope = new Impl();
     final AtomicReference<Object> thisRef = new AtomicReference<>();
-    final ThPredicate<Object, Throwable> block1 = arg -> {
+    final ThPredicate<Object, Throwable> blockTrue = arg -> {
       thisRef.set(arg);
       return true;
     };
-    final ThPredicate<Object, Throwable> block2 = arg -> false;
+    final ThPredicate<Object, Throwable> blockFalse = arg -> false;
 
-    assertThat(jkScope.takeIf(block1).get())
+    assertThat(jkScope.takeIf(blockTrue).get())
       .isSameAs(jkScope);
     assertThat(thisRef.get())
       .isSameAs(jkScope);
-    assertThat(jkScope.takeIf(block2).isEmpty())
+    assertThat(jkScope.takeIf(blockFalse).isEmpty())
       .isTrue();
   }
 
@@ -242,17 +242,17 @@ final class JKScopeTest {
   void takeUnlessInstanceMethod() {
     final JKScope<?> jkScope = new Impl();
     final AtomicReference<Object> thisRef = new AtomicReference<>();
-    final ThPredicate<Object, Throwable> block1 = arg -> {
+    final ThPredicate<Object, Throwable> blockFalse = arg -> {
       thisRef.set(arg);
       return false;
     };
-    final ThPredicate<Object, Throwable> block2 = arg -> true;
+    final ThPredicate<Object, Throwable> blockTrue = arg -> true;
 
-    assertThat(jkScope.takeUnless(block1).get())
+    assertThat(jkScope.takeUnless(blockFalse).get())
       .isSameAs(jkScope);
     assertThat(thisRef.get())
       .isSameAs(jkScope);
-    assertThat(jkScope.takeUnless(block2).isEmpty())
+    assertThat(jkScope.takeUnless(blockTrue).isEmpty())
       .isTrue();
   }
 
@@ -527,6 +527,40 @@ final class JKScopeTest {
     final ThTriFunction<Object, Object, Object, Object, Throwable> block = null;
 
     assertThatThrownBy(() -> JKScope.letWith(value1, value2, value3, block))
+      .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void lazyInitializerStaticMethodThrowsNPEForNullArg() {
+    final ThSupplier<Object, Throwable> nullInitializer = null;
+
+    assertThatThrownBy(() -> JKScope.lazy(nullInitializer))
+      .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void lazyLockInitializerStaticMethodThrowsNPEForNullArg() {
+    final Object lock = new Object();
+    final Object nullLock = null;
+    final ThSupplier<Object, Throwable> initializer = () -> new Object();
+    final ThSupplier<Object, Throwable> nullInitializer = null;
+
+    assertThatThrownBy(() -> JKScope.lazy(nullLock, initializer))
+      .isInstanceOf(NullPointerException.class);
+    assertThatThrownBy(() -> JKScope.lazy(lock, nullInitializer))
+      .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void lazyThreadSafetyModeAndInitializerStaticMethodThrowsNPEForNullArg() {
+    final Lazy.ThreadSafetyMode threadSafetyMode = Lazy.ThreadSafetyMode.SYNCHRONIZED;
+    final Lazy.ThreadSafetyMode nullThreadSafetyMode = null;
+    final ThSupplier<Object, Throwable> initializer = () -> new Object();
+    final ThSupplier<Object, Throwable> nullInitializer = null;
+
+    assertThatThrownBy(() -> JKScope.lazy(nullThreadSafetyMode, initializer))
+      .isInstanceOf(NullPointerException.class);
+    assertThatThrownBy(() -> JKScope.lazy(threadSafetyMode, nullInitializer))
       .isInstanceOf(NullPointerException.class);
   }
 
@@ -1311,6 +1345,43 @@ final class JKScopeTest {
 
     assertThatThrownBy(() -> JKScope.letWith(value1, value2, value3, block))
       .isSameAs(throwable);
+  }
+
+  @Test
+  void lazyInitializerStaticMethod() {
+    final ThSupplier<Object, Throwable> initializer = () -> new Object();
+
+    assertThat(JKScope.lazy(initializer))
+      .isInstanceOf(Lazy.Synchronized.class);
+  }
+
+  @Test
+  void lazyLockAndInitializerStaticMethod() {
+    final Object lock = new Object();
+    final ThSupplier<Object, Throwable> initializer = () -> new Object();
+
+    assertThat(JKScope.lazy(lock, initializer))
+      .isInstanceOf(Lazy.Synchronized.class);
+  }
+
+  @Test
+  void lazyThreadSafetyModeAndInitializerStaticMethod() {
+    final ThSupplier<Object, Throwable> initializer = () -> new Object();
+
+    assertThat(JKScope.lazy(Lazy.ThreadSafetyMode.SYNCHRONIZED, initializer))
+      .isInstanceOf(Lazy.Synchronized.class);
+    assertThat(JKScope.lazy(Lazy.ThreadSafetyMode.PUBLICATION, initializer))
+      .isInstanceOf(Lazy.SafePublication.class);
+    assertThat(JKScope.lazy(Lazy.ThreadSafetyMode.NONE, initializer))
+      .isInstanceOf(Lazy.Unsafe.class);
+  }
+
+  @Test
+  void lazyOfValueStaticMethod() {
+    final Object value = new Object();
+
+    assertThat(JKScope.lazyOfValue(value))
+      .isInstanceOf(Lazy.Initialized.class);
   }
 
   //endregion
