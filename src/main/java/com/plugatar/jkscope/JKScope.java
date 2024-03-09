@@ -83,8 +83,6 @@ import static com.plugatar.jkscope.Utils.uncheckedCast;
  * <li>{@link #withResource(AutoCloseable, ThConsumer)}</li>
  * <li>{@link #with(Object, Object, ThBiConsumer)}</li>
  * <li>{@link #with(Object, Object, Object, ThTriConsumer)}</li>
- * <li>{@link #let(Object)}</li>
- * <li>{@link #letNonNull(Object)}</li>
  * <li>{@link #let(ThSupplier)}</li>
  * <li>{@link #letInt(ThIntSupplier)}</li>
  * <li>{@link #letLong(ThLongSupplier)}</li>
@@ -104,6 +102,8 @@ import static com.plugatar.jkscope.Utils.uncheckedCast;
  * <li>{@link #letWithResource(AutoCloseable, ThFunction)}</li>
  * <li>{@link #letWith(Object, Object, ThBiFunction)}</li>
  * <li>{@link #letWith(Object, Object, Object, ThTriFunction)}</li>
+ * <li>{@link #opt(Object)}</li>
+ * <li>{@link #optNonNull(Object)}</li>
  * <li>{@link #lazy(ThSupplier)}</li>
  * <li>{@link #lazy(Object, ThSupplier)}</li>
  * <li>{@link #lazy(Lazy.ThreadSafetyMode, ThSupplier)}</li>
@@ -116,7 +116,7 @@ import static com.plugatar.jkscope.Utils.uncheckedCast;
  *   it.put("value2", 2);
  * };
  *
- * let("value").takeUnless(it -> it.isEmpty()).takeIf(it -> it.length() < 100).letIt(it -> System.out.println(it));
+ * opt("value").takeUnless(it -> it.isEmpty()).takeIf(it -> it.length() < 100).letIt(it -> System.out.println(it));
  *
  * int value = letIntRec(10, (n, func) -> {
  *   if (n < 2) {
@@ -371,35 +371,6 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
                                 final ThTriConsumer<? super V1, ? super V2, ? super V3, ?> block) {
     blockArgNotNull(block);
     ThTriConsumer.unchecked(block).accept(value1, value2, value3);
-  }
-
-  /**
-   * Returns {@link Opt} instance of given value, {@code null} is also considered as a value.
-   * <pre>{@code
-   * let(value).takeNonNull().takeUnless(it -> it.isEmpty()).takeIf(it -> it.length() < 100).letIt(it -> System.out.println(it));
-   * }</pre>
-   *
-   * @param value the value
-   * @param <V>   the type of the value
-   * @return {@link Opt} instance of given value
-   */
-  static <V> Opt<V> let(final V value) {
-    return Opt.of(value);
-  }
-
-  /**
-   * Returns {@link Opt} instance of given value or empty {@link Opt} instance if given value is null. Equivalent to
-   * calling a chain of methods: {@code let(value).takeNonNull()}.
-   * <pre>{@code
-   * letNonNull(value).takeUnless(it -> it.isEmpty()).takeIf(it -> it.length() < 100).letIt(it -> System.out.println(it));
-   * }</pre>
-   *
-   * @param value the value
-   * @param <V>   the type of the value
-   * @return {@link Opt} instance of given value or empty {@link Opt} instance if given value is null
-   */
-  static <V> Opt<V> letNonNull(final V value) {
-    return Opt.nonNullOf(value);
   }
 
   /**
@@ -812,6 +783,35 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
                                    final ThTriFunction<? super V1, ? super V2, ? super V3, ? extends R, ?> block) {
     blockArgNotNull(block);
     return ThTriFunction.unchecked(block).apply(value1, value2, value3);
+  }
+
+  /**
+   * Returns {@link Opt} instance of given value, {@code null} is also considered as a value.
+   * <pre>{@code
+   * opt(value).takeNonNull().takeUnless(it -> it.isEmpty()).takeIf(it -> it.length() < 100).letIt(it -> System.out.println(it));
+   * }</pre>
+   *
+   * @param value the value
+   * @param <V>   the type of the value
+   * @return {@link Opt} instance of given value
+   */
+  static <V> Opt<V> opt(final V value) {
+    return Opt.of(value);
+  }
+
+  /**
+   * Returns {@link Opt} instance of given value or empty {@link Opt} instance if given value is null. Equivalent to
+   * calling a chain of methods: {@code opt(value).takeNonNull()}.
+   * <pre>{@code
+   * optNonNull(value).takeUnless(it -> it.isEmpty()).takeIf(it -> it.length() < 100).letIt(it -> System.out.println(it));
+   * }</pre>
+   *
+   * @param value the value
+   * @param <V>   the type of the value
+   * @return {@link Opt} instance of given value or empty {@link Opt} instance if given value is null
+   */
+  static <V> Opt<V> optNonNull(final V value) {
+    return Opt.nonNullOf(value);
   }
 
   /**

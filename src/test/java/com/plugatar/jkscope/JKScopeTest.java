@@ -810,28 +810,6 @@ final class JKScopeTest {
   }
 
   @Test
-  void letStaticMethod() {
-    final Object nonNullValue = new Object();
-    assertThat(JKScope.let(nonNullValue).get())
-      .isSameAs(nonNullValue);
-
-    final Object nullValue = null;
-    assertThat(JKScope.let(nullValue).get())
-      .isNull();
-  }
-
-  @Test
-  void letNonNullStaticMethod() {
-    final Object nonNullValue = new Object();
-    assertThat(JKScope.letNonNull(nonNullValue).get())
-      .isSameAs(nonNullValue);
-
-    final Object nullValue = null;
-    assertThat(JKScope.letNonNull(nullValue).isEmpty())
-      .isTrue();
-  }
-
-  @Test
   void letSupplierStaticMethod() {
     final Object result = new Object();
     final ThSupplier<Object, Throwable> block = () -> result;
@@ -1345,6 +1323,28 @@ final class JKScopeTest {
 
     assertThatThrownBy(() -> JKScope.letWith(value1, value2, value3, block))
       .isSameAs(throwable);
+  }
+
+  @Test
+  void optStaticMethod() {
+    final Object nonNullValue = new Object();
+    assertThat(JKScope.opt(nonNullValue).get())
+      .isSameAs(nonNullValue);
+
+    final Object nullValue = null;
+    assertThat(JKScope.opt(nullValue).get())
+      .isNull();
+  }
+
+  @Test
+  void optNonNullStaticMethod() {
+    final Object nonNullValue = new Object();
+    assertThat(JKScope.optNonNull(nonNullValue).get())
+      .isSameAs(nonNullValue);
+
+    final Object nullValue = null;
+    assertThat(JKScope.optNonNull(nullValue).isEmpty())
+      .isTrue();
   }
 
   @Test
