@@ -15,6 +15,9 @@
  */
 package com.plugatar.jkscope.function;
 
+import static com.plugatar.jkscope.function.Utils.originArgNotNull;
+import static com.plugatar.jkscope.function.Utils.uncheckedCast;
+
 /**
  * The {@link Runnable} specialization that might throw an exception.
  *
@@ -32,12 +35,14 @@ public interface ThRunnable<E extends Throwable> {
   void run() throws E;
 
   /**
-   * Returns this runnable as an unchecked runnable.
+   * Returns given runnable as an unchecked runnable.
    *
+   * @param origin the origin runnable
    * @return unchecked runnable
+   * @throws NullPointerException if {@code origin} arg is null
    */
-  @SuppressWarnings("unchecked")
-  default ThRunnable<RuntimeException> asUnchecked() {
-    return (ThRunnable<RuntimeException>) this;
+  static ThRunnable<RuntimeException> unchecked(final ThRunnable<?> origin) {
+    originArgNotNull(origin);
+    return uncheckedCast(origin);
   }
 }

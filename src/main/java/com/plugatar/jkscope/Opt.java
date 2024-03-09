@@ -165,33 +165,33 @@ public interface Opt<V> extends BaseScope<V, Opt<V>> {
     @Override
     public Opt<V> also(final ThConsumer<? super V, ?> block) {
       blockArgNotNull(block);
-      block.asUnchecked().accept(this.value);
+      ThConsumer.unchecked(block).accept(this.value);
       return this;
     }
 
     @Override
     public Opt<V> letIt(final ThConsumer<? super V, ?> block) {
       blockArgNotNull(block);
-      block.asUnchecked().accept(this.value);
+      ThConsumer.unchecked(block).accept(this.value);
       return this;
     }
 
     @Override
     public <R> R letOut(final ThFunction<? super V, ? extends R, ?> block) {
       blockArgNotNull(block);
-      return block.asUnchecked().apply(this.value);
+      return ThFunction.unchecked(block).apply(this.value);
     }
 
     @Override
     public <R> Opt<R> letOpt(final ThFunction<? super V, ? extends R, ?> block) {
       blockArgNotNull(block);
-      return Opt.of(block.asUnchecked().apply(this.value));
+      return Opt.of(ThFunction.unchecked(block).apply(this.value));
     }
 
     @Override
     public Opt<V> takeIf(final ThPredicate<? super V, ?> block) {
       blockArgNotNull(block);
-      return block.asUnchecked().test(this.value)
+      return ThPredicate.unchecked(block).test(this.value)
         ? this
         : Opt.empty();
     }
@@ -199,7 +199,7 @@ public interface Opt<V> extends BaseScope<V, Opt<V>> {
     @Override
     public Opt<V> takeUnless(final ThPredicate<? super V, ?> block) {
       blockArgNotNull(block);
-      return block.asUnchecked().test(this.value)
+      return ThPredicate.unchecked(block).test(this.value)
         ? Opt.empty()
         : this;
     }
@@ -320,9 +320,7 @@ public interface Opt<V> extends BaseScope<V, Opt<V>> {
     @Override
     public Opt<V> throwIfEmpty(final ThSupplier<? extends Throwable, ?> block) {
       blockArgNotNull(block);
-      return ((ThFunction<ThSupplier<? extends Throwable, ?>, Opt<V>, ?>) it -> { throw it.get(); })
-        .asUnchecked()
-        .apply(block);
+      return ThFunction.<ThSupplier<? extends Throwable, ?>, Opt<V>>unchecked(it -> { throw it.get(); }).apply(block);
     }
 
     @Override
@@ -348,15 +346,13 @@ public interface Opt<V> extends BaseScope<V, Opt<V>> {
     @Override
     public V orElseGet(final ThSupplier<? extends V, ?> block) {
       blockArgNotNull(block);
-      return block.asUnchecked().get();
+      return ThSupplier.unchecked(block).get();
     }
 
     @Override
     public V orElseThrow(final ThSupplier<? extends Throwable, ?> block) {
       blockArgNotNull(block);
-      return ((ThFunction<ThSupplier<? extends Throwable, ?>, V, ?>) it -> { throw it.get(); })
-        .asUnchecked()
-        .apply(block);
+      return ThFunction.<ThSupplier<? extends Throwable, ?>, V>unchecked(it -> { throw it.get(); }).apply(block);
     }
 
     @Override

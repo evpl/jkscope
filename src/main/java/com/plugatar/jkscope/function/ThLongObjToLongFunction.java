@@ -15,6 +15,9 @@
  */
 package com.plugatar.jkscope.function;
 
+import static com.plugatar.jkscope.function.Utils.originArgNotNull;
+import static com.plugatar.jkscope.function.Utils.uncheckedCast;
+
 /**
  * The {@link java.util.function.Function} specialization that accepts an object-valued and a {@code long}-valued
  * argument and produces an {@code long}-valued result and might throw an exception.
@@ -37,12 +40,15 @@ public interface ThLongObjToLongFunction<T, E extends Throwable> {
   long apply(long value, T t) throws E;
 
   /**
-   * Returns this functions as an unchecked functions.
+   * Returns given function as an unchecked function.
    *
+   * @param origin the origin function
+   * @param <T>    the type of the second input argument
    * @return unchecked function
+   * @throws NullPointerException if {@code origin} arg is null
    */
-  @SuppressWarnings("unchecked")
-  default ThLongObjToLongFunction<T, RuntimeException> asUnchecked() {
-    return (ThLongObjToLongFunction<T, RuntimeException>) this;
+  static <T> ThLongObjToLongFunction<T, RuntimeException> unchecked(final ThLongObjToLongFunction<? super T, ?> origin) {
+    originArgNotNull(origin);
+    return uncheckedCast(origin);
   }
 }

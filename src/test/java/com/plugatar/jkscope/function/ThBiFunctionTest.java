@@ -28,7 +28,15 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 final class ThBiFunctionTest {
 
   @Test
-  void asUncheckedMethod() {
+  void uncheckedStaticMethodThrowsNPEForNullArg() {
+    final ThBiFunction<Object, Object, Object, Throwable> origin = null;
+
+    assertThatThrownBy(() -> ThBiFunction.unchecked(origin))
+      .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void uncheckedStaticMethod() {
     final Object value1 = new Object();
     final Object value2 = new Object();
     final AtomicReference<Object> valueRef1 = new AtomicReference<>();
@@ -40,7 +48,7 @@ final class ThBiFunctionTest {
       return result;
     };
 
-    final ThBiFunction<Object, Object, Object, RuntimeException> unchecked = origin.asUnchecked();
+    final ThBiFunction<Object, Object, Object, RuntimeException> unchecked = ThBiFunction.unchecked(origin);
     assertThat(unchecked.apply(value1, value2))
       .isSameAs(result);
     assertThat(valueRef1.get())
@@ -50,13 +58,13 @@ final class ThBiFunctionTest {
   }
 
   @Test
-  void asUncheckedMethodThrowsException() {
+  void uncheckedStaticMethodThrowsException() {
     final Object value1 = new Object();
     final Object value2 = new Object();
     final Throwable throwable = new Throwable();
     final ThBiFunction<Object, Object, Object, Throwable> origin = (arg1, arg2) -> { throw throwable; };
 
-    final ThBiFunction<Object, Object, Object, RuntimeException> unchecked = origin.asUnchecked();
+    final ThBiFunction<Object, Object, Object, RuntimeException> unchecked = ThBiFunction.unchecked(origin);
     assertThatThrownBy(() -> unchecked.apply(value1, value2))
       .isSameAs(throwable);
   }

@@ -137,33 +137,33 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
   @Override
   default V also(final ThConsumer<? super V, ?> block) {
     blockArgNotNull(block);
-    block.asUnchecked().accept(uncheckedCast(this));
+    ThConsumer.unchecked(block).accept(uncheckedCast(this));
     return uncheckedCast(this);
   }
 
   @Override
   default V letIt(final ThConsumer<? super V, ?> block) {
     blockArgNotNull(block);
-    block.asUnchecked().accept(uncheckedCast(this));
+    ThConsumer.unchecked(block).accept(uncheckedCast(this));
     return uncheckedCast(this);
   }
 
   @Override
   default <R> R letOut(final ThFunction<? super V, ? extends R, ?> block) {
     blockArgNotNull(block);
-    return block.asUnchecked().apply(uncheckedCast(this));
+    return ThFunction.unchecked(block).apply(uncheckedCast(this));
   }
 
   @Override
   default <R> Opt<R> letOpt(final ThFunction<? super V, ? extends R, ?> block) {
     blockArgNotNull(block);
-    return Opt.of(block.asUnchecked().apply(uncheckedCast(this)));
+    return Opt.of(ThFunction.unchecked(block).apply(uncheckedCast(this)));
   }
 
   @Override
   default Opt<V> takeIf(final ThPredicate<? super V, ?> block) {
     blockArgNotNull(block);
-    return block.asUnchecked().test(uncheckedCast(this))
+    return ThPredicate.unchecked(block).test(uncheckedCast(this))
       ? Opt.of(uncheckedCast(this))
       : Opt.empty();
   }
@@ -171,7 +171,7 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
   @Override
   default Opt<V> takeUnless(final ThPredicate<? super V, ?> block) {
     blockArgNotNull(block);
-    return block.asUnchecked().test(uncheckedCast(this))
+    return ThPredicate.unchecked(block).test(uncheckedCast(this))
       ? Opt.empty()
       : Opt.of(uncheckedCast(this));
   }
@@ -189,7 +189,7 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
    */
   static void run(final ThRunnable<?> block) {
     blockArgNotNull(block);
-    block.asUnchecked().run();
+    ThRunnable.unchecked(block).run();
   }
 
   /**
@@ -208,7 +208,7 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
   static void runCatching(final ThRunnable<?> block) {
     blockArgNotNull(block);
     try {
-      block.asUnchecked().run();
+      block.run();
     } catch (final Throwable ignored) { }
   }
 
@@ -229,7 +229,7 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
     blockArgNotNull(block);
     final AtomicReference<ThRunnable<Throwable>> selfRef = new AtomicReference<>();
     selfRef.set(() -> block.accept(selfRef.get()));
-    block.asUnchecked().accept(selfRef.get());
+    ThConsumer.unchecked(block).accept(selfRef.get());
   }
 
   /**
@@ -248,7 +248,7 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
   static <V> void with(final V value,
                        final ThConsumer<? super V, ?> block) {
     blockArgNotNull(block);
-    block.asUnchecked().accept(value);
+    ThConsumer.unchecked(block).accept(value);
   }
 
   /**
@@ -266,7 +266,7 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
   static void withInt(final int value,
                       final ThIntConsumer<?> block) {
     blockArgNotNull(block);
-    block.asUnchecked().accept(value);
+    ThIntConsumer.unchecked(block).accept(value);
   }
 
   /**
@@ -284,7 +284,7 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
   static void withLong(final long value,
                        final ThLongConsumer<?> block) {
     blockArgNotNull(block);
-    block.asUnchecked().accept(value);
+    ThLongConsumer.unchecked(block).accept(value);
   }
 
   /**
@@ -302,7 +302,7 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
   static void withDouble(final double value,
                          final ThDoubleConsumer<?> block) {
     blockArgNotNull(block);
-    block.asUnchecked().accept(value);
+    ThDoubleConsumer.unchecked(block).accept(value);
   }
 
   /**
@@ -319,11 +319,11 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
   static <V extends AutoCloseable> void withResource(final V value,
                                                      final ThConsumer<? super V, ?> block) {
     blockArgNotNull(block);
-    ((ThBiConsumer<V, ThConsumer<? super V, ?>, Throwable>) (v, b) -> {
+    ThBiConsumer.<V, ThConsumer<? super V, ?>>unchecked((v, b) -> {
       try (final V resource = v) {
         b.accept(resource);
       }
-    }).asUnchecked().accept(value, block);
+    }).accept(value, block);
   }
 
   /**
@@ -345,7 +345,7 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
                             final V2 value2,
                             final ThBiConsumer<? super V1, ? super V2, ?> block) {
     blockArgNotNull(block);
-    block.asUnchecked().accept(value1, value2);
+    ThBiConsumer.unchecked(block).accept(value1, value2);
   }
 
   /**
@@ -370,7 +370,7 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
                                 final V3 value3,
                                 final ThTriConsumer<? super V1, ? super V2, ? super V3, ?> block) {
     blockArgNotNull(block);
-    block.asUnchecked().accept(value1, value2, value3);
+    ThTriConsumer.unchecked(block).accept(value1, value2, value3);
   }
 
   /**
@@ -418,7 +418,7 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
    */
   static <V> V let(final ThSupplier<? extends V, ?> block) {
     blockArgNotNull(block);
-    return block.asUnchecked().get();
+    return ThSupplier.unchecked(block).get();
   }
 
   /**
@@ -436,7 +436,7 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
    */
   static int letInt(final ThIntSupplier<?> block) {
     blockArgNotNull(block);
-    return block.asUnchecked().get();
+    return ThIntSupplier.unchecked(block).get();
   }
 
   /**
@@ -454,7 +454,7 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
    */
   static long letLong(final ThLongSupplier<?> block) {
     blockArgNotNull(block);
-    return block.asUnchecked().get();
+    return ThLongSupplier.unchecked(block).get();
   }
 
   /**
@@ -472,7 +472,7 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
    */
   static double letDouble(final ThDoubleSupplier<?> block) {
     blockArgNotNull(block);
-    return block.asUnchecked().get();
+    return ThDoubleSupplier.unchecked(block).get();
   }
 
   /**
@@ -492,7 +492,7 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
   static <V> V let(final V value,
                    final ThConsumer<? super V, ?> block) {
     blockArgNotNull(block);
-    block.asUnchecked().accept(value);
+    ThConsumer.unchecked(block).accept(value);
     return value;
   }
 
@@ -512,7 +512,7 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
   static int letInt(final int value,
                     final ThIntConsumer<?> block) {
     blockArgNotNull(block);
-    block.asUnchecked().accept(value);
+    ThIntConsumer.unchecked(block).accept(value);
     return value;
   }
 
@@ -532,7 +532,7 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
   static long letLong(final long value,
                       final ThLongConsumer<?> block) {
     blockArgNotNull(block);
-    block.asUnchecked().accept(value);
+    ThLongConsumer.unchecked(block).accept(value);
     return value;
   }
 
@@ -552,7 +552,7 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
   static double letDouble(final double value,
                           final ThDoubleConsumer<?> block) {
     blockArgNotNull(block);
-    block.asUnchecked().accept(value);
+    ThDoubleConsumer.unchecked(block).accept(value);
     return value;
   }
 
@@ -578,7 +578,7 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
     blockArgNotNull(block);
     final AtomicReference<ThFunction<V, V, Throwable>> selfRef = new AtomicReference<>();
     selfRef.set(v -> block.apply(v, selfRef.get()));
-    return block.asUnchecked().apply(initialValue, selfRef.get());
+    return ThBiFunction.unchecked(block).apply(initialValue, selfRef.get());
   }
 
   /**
@@ -602,7 +602,7 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
     blockArgNotNull(block);
     final AtomicReference<ThIntToIntFunction<Throwable>> selfRef = new AtomicReference<>();
     selfRef.set(v -> block.apply(v, selfRef.get()));
-    return block.asUnchecked().apply(initialValue, selfRef.get());
+    return ThIntObjToIntFunction.unchecked(block).apply(initialValue, selfRef.get());
   }
 
   /**
@@ -626,7 +626,7 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
     blockArgNotNull(block);
     final AtomicReference<ThLongToLongFunction<Throwable>> selfRef = new AtomicReference<>();
     selfRef.set(v -> block.apply(v, selfRef.get()));
-    return block.asUnchecked().apply(initialValue, selfRef.get());
+    return ThLongObjToLongFunction.unchecked(block).apply(initialValue, selfRef.get());
   }
 
   /**
@@ -650,7 +650,7 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
     blockArgNotNull(block);
     final AtomicReference<ThDoubleToDoubleFunction<Throwable>> selfRef = new AtomicReference<>();
     selfRef.set(v -> block.apply(v, selfRef.get()));
-    return block.asUnchecked().apply(initialValue, selfRef.get());
+    return ThDoubleObjToDoubleFunction.unchecked(block).apply(initialValue, selfRef.get());
   }
 
   /**
@@ -672,7 +672,7 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
   static <V, R> R letWith(final V value,
                           final ThFunction<? super V, ? extends R, ?> block) {
     blockArgNotNull(block);
-    return block.asUnchecked().apply(value);
+    return ThFunction.unchecked(block).apply(value);
   }
 
   /**
@@ -692,7 +692,7 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
   static <V> int letIntWith(final V value,
                             final ThToIntFunction<? super V, ?> block) {
     blockArgNotNull(block);
-    return block.asUnchecked().apply(value);
+    return ThToIntFunction.unchecked(block).apply(value);
   }
 
   /**
@@ -712,7 +712,7 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
   static <V> long letLongWith(final V value,
                               final ThToLongFunction<? super V, ?> block) {
     blockArgNotNull(block);
-    return block.asUnchecked().apply(value);
+    return ThToLongFunction.unchecked(block).apply(value);
   }
 
   /**
@@ -732,7 +732,7 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
   static <V> double letDoubleWith(final V value,
                                   final ThToDoubleFunction<? super V, ?> block) {
     blockArgNotNull(block);
-    return block.asUnchecked().apply(value);
+    return ThToDoubleFunction.unchecked(block).apply(value);
   }
 
   /**
@@ -751,11 +751,11 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
   static <V extends AutoCloseable, R> R letWithResource(final V value,
                                                         final ThFunction<? super V, ? extends R, ?> block) {
     blockArgNotNull(block);
-    return ((ThBiFunction<V, ThFunction<? super V, ? extends R, ?>, R, Throwable>) (v, b) -> {
+    return ThBiFunction.<V, ThFunction<? super V, ? extends R, ?>, R>unchecked((v, b) -> {
       try (final V resource = v) {
         return b.apply(resource);
       }
-    }).asUnchecked().apply(value, block);
+    }).apply(value, block);
   }
 
   /**
@@ -781,7 +781,7 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
                                final V2 value2,
                                final ThBiFunction<? super V1, ? super V2, ? extends R, ?> block) {
     blockArgNotNull(block);
-    return block.asUnchecked().apply(value1, value2);
+    return ThBiFunction.unchecked(block).apply(value1, value2);
   }
 
   /**
@@ -811,7 +811,7 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
                                    final V3 value3,
                                    final ThTriFunction<? super V1, ? super V2, ? super V3, ? extends R, ?> block) {
     blockArgNotNull(block);
-    return block.asUnchecked().apply(value1, value2, value3);
+    return ThTriFunction.unchecked(block).apply(value1, value2, value3);
   }
 
   /**

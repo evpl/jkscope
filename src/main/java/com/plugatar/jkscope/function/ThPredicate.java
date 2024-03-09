@@ -15,6 +15,9 @@
  */
 package com.plugatar.jkscope.function;
 
+import static com.plugatar.jkscope.function.Utils.originArgNotNull;
+import static com.plugatar.jkscope.function.Utils.uncheckedCast;
+
 /**
  * The {@link java.util.function.Predicate} specialization that might throw an exception.
  *
@@ -35,12 +38,15 @@ public interface ThPredicate<T, E extends Throwable> {
   boolean test(T t) throws E;
 
   /**
-   * Returns this predicate as an unchecked predicate.
+   * Returns given supplier as an unchecked supplier.
    *
-   * @return unchecked predicate
+   * @param origin the origin supplier
+   * @param <T>    the type of the input argument
+   * @return unchecked supplier
+   * @throws NullPointerException if {@code origin} arg is null
    */
-  @SuppressWarnings("unchecked")
-  default ThPredicate<T, RuntimeException> asUnchecked() {
-    return (ThPredicate<T, RuntimeException>) this;
+  static <T> ThPredicate<T, RuntimeException> unchecked(final ThPredicate<? super T, ?> origin) {
+    originArgNotNull(origin);
+    return uncheckedCast(origin);
   }
 }

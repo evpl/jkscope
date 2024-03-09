@@ -28,7 +28,15 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 final class ThConsumerTest {
 
   @Test
-  void asUncheckedMethod() {
+  void uncheckedStaticMethodThrowsNPEForNullArg() {
+    final ThConsumer<Object, Throwable> origin = null;
+
+    assertThatThrownBy(() -> ThConsumer.unchecked(origin))
+      .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void uncheckedStaticMethod() {
     final Object value = new Object();
     final AtomicReference<Object> valueRef = new AtomicReference<>();
     final Throwable throwable = new Throwable();
@@ -37,7 +45,7 @@ final class ThConsumerTest {
       throw throwable;
     };
 
-    final ThConsumer<Object, RuntimeException> unchecked = origin.asUnchecked();
+    final ThConsumer<Object, RuntimeException> unchecked = ThConsumer.unchecked(origin);
     assertThatThrownBy(() -> unchecked.accept(value))
       .isSameAs(throwable);
     assertThat(valueRef.get())

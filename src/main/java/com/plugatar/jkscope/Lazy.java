@@ -38,34 +38,34 @@ public interface Lazy<V> extends ThSupplier<V, RuntimeException>, BaseScope<V, L
   @Override
   default Lazy<V> also(final ThConsumer<? super V, ?> block) {
     blockArgNotNull(block);
-    block.asUnchecked().accept(this.get());
+    ThConsumer.unchecked(block).accept(this.get());
     return this;
   }
 
   @Override
   default Lazy<V> letIt(final ThConsumer<? super V, ?> block) {
     blockArgNotNull(block);
-    block.asUnchecked().accept(this.get());
+    ThConsumer.unchecked(block).accept(this.get());
     return this;
   }
 
   @Override
   default <R> R letOut(final ThFunction<? super V, ? extends R, ?> block) {
     blockArgNotNull(block);
-    return block.asUnchecked().apply(this.get());
+    return ThFunction.unchecked(block).apply(this.get());
   }
 
   @Override
   default <R> Opt<R> letOpt(final ThFunction<? super V, ? extends R, ?> block) {
     blockArgNotNull(block);
-    return Opt.of(block.asUnchecked().apply(this.get()));
+    return Opt.of(ThFunction.unchecked(block).apply(this.get()));
   }
 
   @Override
   default Opt<V> takeIf(final ThPredicate<? super V, ?> block) {
     blockArgNotNull(block);
     final V v = this.get();
-    return block.asUnchecked().test(v)
+    return ThPredicate.unchecked(block).test(v)
       ? Opt.of(v)
       : Opt.empty();
   }
@@ -74,7 +74,7 @@ public interface Lazy<V> extends ThSupplier<V, RuntimeException>, BaseScope<V, L
   default Opt<V> takeUnless(final ThPredicate<? super V, ?> block) {
     blockArgNotNull(block);
     final V v = this.get();
-    return block.asUnchecked().test(v)
+    return ThPredicate.unchecked(block).test(v)
       ? Opt.empty()
       : Opt.of(v);
   }
@@ -210,7 +210,7 @@ public interface Lazy<V> extends ThSupplier<V, RuntimeException>, BaseScope<V, L
         if (v2 != UNINITIALIZED_VALUE) {
           return uncheckedCast(v2);
         }
-        final V newValue = this.initializer.asUnchecked().get();
+        final V newValue = ThSupplier.unchecked(this.initializer).get();
         this.value = newValue;
         this.initializer = null;
         return newValue;
@@ -264,7 +264,7 @@ public interface Lazy<V> extends ThSupplier<V, RuntimeException>, BaseScope<V, L
       }
       final ThSupplier<? extends V, ?> init = this.initializer;
       if (init != null) {
-        final V newValue = init.asUnchecked().get();
+        final V newValue = ThSupplier.unchecked(init).get();
         if (VALUE_UPDATER.compareAndSet(this, UNINITIALIZED_VALUE, newValue)) {
           this.initializer = null;
           return newValue;
@@ -318,7 +318,7 @@ public interface Lazy<V> extends ThSupplier<V, RuntimeException>, BaseScope<V, L
       }
       final ThSupplier<? extends V, ?> init = this.initializer;
       if (init != null) {
-        final V newValue = init.asUnchecked().get();
+        final V newValue = ThSupplier.unchecked(init).get();
         this.value = newValue;
         this.initializer = null;
         return newValue;

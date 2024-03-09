@@ -28,7 +28,15 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 final class ThLongConsumerTest {
 
   @Test
-  void asUncheckedMethod() {
+  void uncheckedStaticMethodThrowsNPEForNullArg() {
+    final ThLongConsumer<Throwable> origin = null;
+
+    assertThatThrownBy(() -> ThLongConsumer.unchecked(origin))
+      .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void uncheckedStaticMethod() {
     final long value = 100L;
     final AtomicLong valueRef = new AtomicLong();
     final Throwable throwable = new Throwable();
@@ -37,7 +45,7 @@ final class ThLongConsumerTest {
       throw throwable;
     };
 
-    final ThLongConsumer<RuntimeException> unchecked = origin.asUnchecked();
+    final ThLongConsumer<RuntimeException> unchecked = ThLongConsumer.unchecked(origin);
     assertThatThrownBy(() -> unchecked.accept(value))
       .isSameAs(throwable);
     assertThat(valueRef.get())

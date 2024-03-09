@@ -28,7 +28,15 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 final class ThDoubleToDoubleFunctionTest {
 
   @Test
-  void asUncheckedMethod() {
+  void uncheckedStaticMethodThrowsNPEForNullArg() {
+    final ThDoubleToDoubleFunction<Throwable> origin = null;
+
+    assertThatThrownBy(() -> ThDoubleToDoubleFunction.unchecked(origin))
+      .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void uncheckedStaticMethod() {
     final double value = 100.0;
     final AtomicReference<Double> valueRef = new AtomicReference<>();
     final double result = 999.0;
@@ -37,7 +45,7 @@ final class ThDoubleToDoubleFunctionTest {
       return result;
     };
 
-    final ThDoubleToDoubleFunction<RuntimeException> unchecked = origin.asUnchecked();
+    final ThDoubleToDoubleFunction<RuntimeException> unchecked = ThDoubleToDoubleFunction.unchecked(origin);
     assertThat(unchecked.apply(value))
       .isEqualTo(result);
     assertThat(valueRef.get())
@@ -45,12 +53,12 @@ final class ThDoubleToDoubleFunctionTest {
   }
 
   @Test
-  void asUncheckedMethodThrowsException() {
+  void uncheckedStaticMethodThrowsException() {
     final double value = 100.0;
     final Throwable throwable = new Throwable();
     final ThDoubleToDoubleFunction<Throwable> origin = arg -> { throw throwable; };
 
-    final ThDoubleToDoubleFunction<RuntimeException> unchecked = origin.asUnchecked();
+    final ThDoubleToDoubleFunction<RuntimeException> unchecked = ThDoubleToDoubleFunction.unchecked(origin);
     assertThatThrownBy(() -> unchecked.apply(value))
       .isSameAs(throwable);
   }

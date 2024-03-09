@@ -15,6 +15,9 @@
  */
 package com.plugatar.jkscope.function;
 
+import static com.plugatar.jkscope.function.Utils.originArgNotNull;
+import static com.plugatar.jkscope.function.Utils.uncheckedCast;
+
 /**
  * The {@link java.util.function.BiConsumer} specialization that might throw an exception.
  *
@@ -36,12 +39,16 @@ public interface ThBiConsumer<T, U, E extends Throwable> {
   void accept(T t, U u) throws E;
 
   /**
-   * Returns this consumer as an unchecked consumer.
+   * Returns given consumer as an unchecked consumer.
    *
+   * @param origin the origin consumer
+   * @param <T>    the type of the first input argument
+   * @param <U>    the type of the second input argument
    * @return unchecked consumer
+   * @throws NullPointerException if {@code origin} arg is null
    */
-  @SuppressWarnings("unchecked")
-  default ThBiConsumer<T, U, RuntimeException> asUnchecked() {
-    return (ThBiConsumer<T, U, RuntimeException>) this;
+  static <T, U> ThBiConsumer<T, U, RuntimeException> unchecked(final ThBiConsumer<? super T, ? super U, ?> origin) {
+    originArgNotNull(origin);
+    return uncheckedCast(origin);
   }
 }

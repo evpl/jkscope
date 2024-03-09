@@ -15,6 +15,9 @@
  */
 package com.plugatar.jkscope.function;
 
+import static com.plugatar.jkscope.function.Utils.originArgNotNull;
+import static com.plugatar.jkscope.function.Utils.uncheckedCast;
+
 /**
  * The {@link java.util.function.Function} specialization for 3 input arguments that might throw an exception.
  *
@@ -39,12 +42,18 @@ public interface ThTriFunction<T, U, V, R, E extends Throwable> {
   R apply(T t, U u, V v) throws E;
 
   /**
-   * Returns this functions as an unchecked functions.
+   * Returns given function as an unchecked function.
    *
+   * @param origin the origin function
+   * @param <T>    the type of the first input argument
+   * @param <U>    the type of the second input argument
+   * @param <V>    the type of the third input argument
+   * @param <R>    the type of the result
    * @return unchecked function
+   * @throws NullPointerException if {@code origin} arg is null
    */
-  @SuppressWarnings("unchecked")
-  default ThTriFunction<T, U, V, R, RuntimeException> asUnchecked() {
-    return (ThTriFunction<T, U, V, R, RuntimeException>) this;
+  static <T, U, V, R> ThTriFunction<T, U, V, R, RuntimeException> unchecked(final ThTriFunction<? super T, ? super U, ? super V, ? extends R, ?> origin) {
+    originArgNotNull(origin);
+    return uncheckedCast(origin);
   }
 }

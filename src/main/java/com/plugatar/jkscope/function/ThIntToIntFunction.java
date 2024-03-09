@@ -15,6 +15,9 @@
  */
 package com.plugatar.jkscope.function;
 
+import static com.plugatar.jkscope.function.Utils.originArgNotNull;
+import static com.plugatar.jkscope.function.Utils.uncheckedCast;
+
 /**
  * The {@link java.util.function.Function} specialization that accepts an {@code int}-valued argument and produces an
  * {@code int}-valued result and might throw an exception.
@@ -35,12 +38,14 @@ public interface ThIntToIntFunction<E extends Throwable> {
   int apply(int value) throws E;
 
   /**
-   * Returns this functions as an unchecked functions.
+   * Returns given function as an unchecked function.
    *
+   * @param origin the origin function
    * @return unchecked function
+   * @throws NullPointerException if {@code origin} arg is null
    */
-  @SuppressWarnings("unchecked")
-  default ThIntToIntFunction<RuntimeException> asUnchecked() {
-    return (ThIntToIntFunction<RuntimeException>) this;
+  static ThIntToIntFunction<RuntimeException> unchecked(final ThIntToIntFunction<?> origin) {
+    originArgNotNull(origin);
+    return uncheckedCast(origin);
   }
 }

@@ -28,7 +28,15 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 final class ThFunctionTest {
 
   @Test
-  void asUncheckedMethod() {
+  void uncheckedStaticMethodThrowsNPEForNullArg() {
+    final ThFunction<Object, Object, Throwable> origin = null;
+
+    assertThatThrownBy(() -> ThFunction.unchecked(origin))
+      .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void uncheckedStaticMethod() {
     final Object value = new Object();
     final AtomicReference<Object> valueRef = new AtomicReference<>();
     final Object result = new Object();
@@ -37,7 +45,7 @@ final class ThFunctionTest {
       return result;
     };
 
-    final ThFunction<Object, Object, RuntimeException> unchecked = origin.asUnchecked();
+    final ThFunction<Object, Object, RuntimeException> unchecked = ThFunction.unchecked(origin);
     assertThat(unchecked.apply(value))
       .isSameAs(result);
     assertThat(valueRef.get())
@@ -45,12 +53,12 @@ final class ThFunctionTest {
   }
 
   @Test
-  void asUncheckedMethodThrowsException() {
+  void uncheckedStaticMethodThrowsException() {
     final Object value = new Object();
     final Throwable throwable = new Throwable();
     final ThFunction<Object, Object, Throwable> origin = arg -> { throw throwable; };
 
-    final ThFunction<Object, Object, RuntimeException> unchecked = origin.asUnchecked();
+    final ThFunction<Object, Object, RuntimeException> unchecked = ThFunction.unchecked(origin);
     assertThatThrownBy(() -> unchecked.apply(value))
       .isSameAs(throwable);
   }

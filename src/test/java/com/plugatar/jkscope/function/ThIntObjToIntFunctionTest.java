@@ -29,7 +29,15 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 final class ThIntObjToIntFunctionTest {
 
   @Test
-  void asUncheckedMethod() {
+  void uncheckedStaticMethodThrowsNPEForNullArg() {
+    final ThIntObjToIntFunction<Object, Throwable> origin = null;
+
+    assertThatThrownBy(() -> ThIntObjToIntFunction.unchecked(origin))
+      .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void uncheckedStaticMethod() {
     final int value1 = 100;
     final Object value2 = new Object();
     final AtomicInteger value1Ref = new AtomicInteger();
@@ -41,7 +49,7 @@ final class ThIntObjToIntFunctionTest {
       return result;
     };
 
-    final ThIntObjToIntFunction<Object, RuntimeException> unchecked = origin.asUnchecked();
+    final ThIntObjToIntFunction<Object, RuntimeException> unchecked = ThIntObjToIntFunction.unchecked(origin);
     assertThat(unchecked.apply(value1, value2))
       .isEqualTo(result);
     assertThat(value1Ref.get())
@@ -51,13 +59,13 @@ final class ThIntObjToIntFunctionTest {
   }
 
   @Test
-  void asUncheckedMethodThrowsException() {
+  void uncheckedStaticMethodThrowsException() {
     final int value1 = 100;
     final Object value2 = new Object();
     final Throwable throwable = new Throwable();
     final ThIntObjToIntFunction<Object, Throwable> origin = (arg1, arg2) -> { throw throwable; };
 
-    final ThIntObjToIntFunction<Object, RuntimeException> unchecked = origin.asUnchecked();
+    final ThIntObjToIntFunction<Object, RuntimeException> unchecked = ThIntObjToIntFunction.unchecked(origin);
     assertThatThrownBy(() -> unchecked.apply(value1, value2))
       .isSameAs(throwable);
   }

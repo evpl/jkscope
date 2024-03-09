@@ -26,21 +26,29 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 final class ThLongSupplierTest {
 
   @Test
-  void asUncheckedMethod() {
+  void uncheckedStaticMethodThrowsNPEForNullArg() {
+    final ThLongSupplier<Throwable> origin = null;
+
+    assertThatThrownBy(() -> ThLongSupplier.unchecked(origin))
+      .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void uncheckedStaticMethod() {
     final long result = 100L;
     final ThLongSupplier<Throwable> origin = () -> result;
 
-    final ThLongSupplier<RuntimeException> unchecked = origin.asUnchecked();
+    final ThLongSupplier<RuntimeException> unchecked = ThLongSupplier.unchecked(origin);
     assertThat(unchecked.get())
       .isEqualTo(result);
   }
 
   @Test
-  void asUncheckedMethodThrowsException() {
+  void uncheckedStaticMethodThrowsException() {
     final Throwable throwable = new Throwable();
     final ThLongSupplier<Throwable> origin = () -> { throw throwable; };
 
-    final ThLongSupplier<RuntimeException> unchecked = origin.asUnchecked();
+    final ThLongSupplier<RuntimeException> unchecked = ThLongSupplier.unchecked(origin);
     assertThatThrownBy(() -> unchecked.get())
       .isSameAs(throwable);
   }

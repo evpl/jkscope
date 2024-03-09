@@ -15,6 +15,9 @@
  */
 package com.plugatar.jkscope.function;
 
+import static com.plugatar.jkscope.function.Utils.originArgNotNull;
+import static com.plugatar.jkscope.function.Utils.uncheckedCast;
+
 /**
  * The {@link java.util.function.Function} specialization that accepts an {@code double}-valued argument and produces an
  * {@code double}-valued result and might throw an exception.
@@ -35,12 +38,14 @@ public interface ThDoubleToDoubleFunction<E extends Throwable> {
   double apply(double value) throws E;
 
   /**
-   * Returns this functions as an unchecked functions.
+   * Returns given function as an unchecked function.
    *
+   * @param origin the origin function
    * @return unchecked function
+   * @throws NullPointerException if {@code origin} arg is null
    */
-  @SuppressWarnings("unchecked")
-  default ThDoubleToDoubleFunction<RuntimeException> asUnchecked() {
-    return (ThDoubleToDoubleFunction<RuntimeException>) this;
+  static ThDoubleToDoubleFunction<RuntimeException> unchecked(final ThDoubleToDoubleFunction<?> origin) {
+    originArgNotNull(origin);
+    return uncheckedCast(origin);
   }
 }

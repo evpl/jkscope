@@ -15,6 +15,9 @@
  */
 package com.plugatar.jkscope.function;
 
+import static com.plugatar.jkscope.function.Utils.originArgNotNull;
+import static com.plugatar.jkscope.function.Utils.uncheckedCast;
+
 /**
  * The {@link java.util.function.Consumer} specialization that that accepts an {@code int}-valued argument and might
  * throw an exception.
@@ -34,12 +37,14 @@ public interface ThIntConsumer<E extends Throwable> {
   void accept(int value) throws E;
 
   /**
-   * Returns this consumer as an unchecked consumer.
+   * Returns given consumer as an unchecked consumer.
    *
+   * @param origin the origin consumer
    * @return unchecked consumer
+   * @throws NullPointerException if {@code origin} arg is null
    */
-  @SuppressWarnings("unchecked")
-  default ThIntConsumer<RuntimeException> asUnchecked() {
-    return (ThIntConsumer<RuntimeException>) this;
+  static ThIntConsumer<RuntimeException> unchecked(final ThIntConsumer<?> origin) {
+    originArgNotNull(origin);
+    return uncheckedCast(origin);
   }
 }

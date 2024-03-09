@@ -28,7 +28,15 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 final class ThTriFunctionTest {
 
   @Test
-  void asUncheckedMethod() {
+  void uncheckedStaticMethodThrowsNPEForNullArg() {
+    final ThTriFunction<Object, Object, Object, Object, Throwable> origin = null;
+
+    assertThatThrownBy(() -> ThTriFunction.unchecked(origin))
+      .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void uncheckedStaticMethod() {
     final Object value1 = new Object();
     final Object value2 = new Object();
     final Object value3 = new Object();
@@ -43,7 +51,7 @@ final class ThTriFunctionTest {
       return functionResult;
     };
 
-    final ThTriFunction<Object, Object, Object, Object, RuntimeException> unchecked = origin.asUnchecked();
+    final ThTriFunction<Object, Object, Object, Object, RuntimeException> unchecked = ThTriFunction.unchecked(origin);
     assertThat(unchecked.apply(value1, value2, value3))
       .isSameAs(functionResult);
     assertThat(valueRef1.get())
@@ -55,7 +63,7 @@ final class ThTriFunctionTest {
   }
 
   @Test
-  void asUncheckedMethodThrowsException() {
+  void uncheckedStaticMethodThrowsException() {
     final Object value1 = new Object();
     final Object value2 = new Object();
     final Object value3 = new Object();
@@ -64,7 +72,7 @@ final class ThTriFunctionTest {
       throw throwable;
     };
 
-    final ThTriFunction<Object, Object, Object, Object, RuntimeException> unchecked = origin.asUnchecked();
+    final ThTriFunction<Object, Object, Object, Object, RuntimeException> unchecked = ThTriFunction.unchecked(origin);
     assertThatThrownBy(() -> unchecked.apply(value1, value2, value3))
       .isSameAs(throwable);
   }

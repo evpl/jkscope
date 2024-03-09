@@ -15,6 +15,9 @@
  */
 package com.plugatar.jkscope.function;
 
+import static com.plugatar.jkscope.function.Utils.originArgNotNull;
+import static com.plugatar.jkscope.function.Utils.uncheckedCast;
+
 /**
  * The {@link java.util.function.Function} specialization that might throw an exception.
  *
@@ -36,12 +39,16 @@ public interface ThFunction<T, R, E extends Throwable> {
   R apply(T t) throws E;
 
   /**
-   * Returns this functions as an unchecked functions.
+   * Returns given function as an unchecked function.
    *
+   * @param origin the origin function
+   * @param <T>    the type of the input argument
+   * @param <R>    the type of the result
    * @return unchecked function
+   * @throws NullPointerException if {@code origin} arg is null
    */
-  @SuppressWarnings("unchecked")
-  default ThFunction<T, R, RuntimeException> asUnchecked() {
-    return (ThFunction<T, R, RuntimeException>) this;
+  static <T, R> ThFunction<T, R, RuntimeException> unchecked(final ThFunction<? super T, ? extends R, ?> origin) {
+    originArgNotNull(origin);
+    return uncheckedCast(origin);
   }
 }

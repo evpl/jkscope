@@ -15,6 +15,9 @@
  */
 package com.plugatar.jkscope.function;
 
+import static com.plugatar.jkscope.function.Utils.originArgNotNull;
+import static com.plugatar.jkscope.function.Utils.uncheckedCast;
+
 /**
  * The {@link java.util.function.Consumer} specialization for 3 input arguments that might throw an exception.
  *
@@ -37,12 +40,17 @@ public interface ThTriConsumer<T, U, V, E extends Throwable> {
   void accept(T t, U u, V v) throws E;
 
   /**
-   * Returns this consumer as an unchecked consumer.
+   * Returns given consumer as an unchecked consumer.
    *
+   * @param origin the origin consumer
+   * @param <T>    the type of the first input argument
+   * @param <U>    the type of the second input argument
+   * @param <V>    the type of the third input argument
    * @return unchecked consumer
+   * @throws NullPointerException if {@code origin} arg is null
    */
-  @SuppressWarnings("unchecked")
-  default ThTriConsumer<T, U, V, RuntimeException> asUnchecked() {
-    return (ThTriConsumer<T, U, V, RuntimeException>) this;
+  static <T, U, V> ThTriConsumer<T, U, V, RuntimeException> unchecked(final ThTriConsumer<? super T, ? super U, ? super V, ?> origin) {
+    originArgNotNull(origin);
+    return uncheckedCast(origin);
   }
 }

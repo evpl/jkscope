@@ -15,6 +15,9 @@
  */
 package com.plugatar.jkscope.function;
 
+import static com.plugatar.jkscope.function.Utils.originArgNotNull;
+import static com.plugatar.jkscope.function.Utils.uncheckedCast;
+
 /**
  * The {@link java.util.function.Supplier} specialization that might throw an exception.
  *
@@ -34,12 +37,15 @@ public interface ThSupplier<R, E extends Throwable> {
   R get() throws E;
 
   /**
-   * Returns this supplier as an unchecked supplier.
+   * Returns given supplier as an unchecked supplier.
    *
-   * @return unchecked runnable
+   * @param origin the origin supplier
+   * @param <R>    the type of the result
+   * @return unchecked supplier
+   * @throws NullPointerException if {@code origin} arg is null
    */
-  @SuppressWarnings("unchecked")
-  default ThSupplier<R, RuntimeException> asUnchecked() {
-    return (ThSupplier<R, RuntimeException>) this;
+  static <R> ThSupplier<R, RuntimeException> unchecked(final ThSupplier<? extends R, ?> origin) {
+    originArgNotNull(origin);
+    return uncheckedCast(origin);
   }
 }
