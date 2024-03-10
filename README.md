@@ -26,7 +26,10 @@ Java scope functions inspired by Kotlin
     * [`run`, `runCatching` and `runRec`](#run-runcatching-and-runrec)
     * [`with`, `withInt`, `withLong`, `withDouble` and `withResource`](#with-withint-withlong-withdouble-and-withresource)
     * [`let` variations](#let-variations)
-  * [`Opt` monad](#opt-monad)
+    * [`opt` and `optNonNull`](#opt-and-optnonnull)
+    * [`lazy` and `lazyOfValue`](#lazy-and-lazyofvalue)
+  * [`Opt` object](#opt-object)
+  * [`Lazy` object](#lazy-object)
   * [Unchecked functions](#unchecked-functions)
   * [Examples](#examples)
     * [Collection initialization](#collection-initialization)
@@ -52,7 +55,7 @@ Maven:
 <dependency>
   <groupId>com.plugatar.jkscope</groupId>
   <artifactId>jkscope</artifactId>
-  <version>2.2</version>
+  <version>2.3</version>
   <scope>compile</scope>
 </dependency>
 ```
@@ -61,7 +64,7 @@ Gradle:
 
 ```groovy
 dependencies {
-    implementation 'com.plugatar.jkscope:jkscope:2.2'
+  implementation 'com.plugatar.jkscope:jkscope:2.3'
 }
 ```
 
@@ -165,15 +168,6 @@ with(value1, value2, (v1, v2) -> {
 
 #### `let` variations
 
-`let` returns `Opt` instance of given value, `letNonNull` returns `Opt` instance of given value of given value or
-empty `Opt` instance if given value is null.
-
-```
-let(value).takeNonNull().takeUnless(it -> it.isEmpty()).takeIf(it -> it.length() < 100).letIt(it -> System.out.println(it));
-
-letNonNull(value).takeUnless(it -> it.isEmpty()).takeIf(it -> it.length() < 100).letIt(it -> System.out.println(it));
-```
-
 `let`, `letInt`, `letLong` and `letDouble` returns result of function block.
 
 ```
@@ -213,11 +207,35 @@ int value = letWith("42", it -> Integer.valueOf(it));
 
 `letWithResource` method does the same thing, but with a `AutoCloseable` resource and closes this resource.
 
-### `Opt` monad
+#### `opt` and `optNonNull`
+
+`opt` returns `Opt` instance of given value, `optNonNull` returns `Opt` instance of given value of given value or
+empty `Opt` instance if given value is null.
+
+```
+opt(value).takeNonNull().takeUnless(it -> it.isEmpty()).takeIf(it -> it.length() < 100).letIt(it -> System.out.println(it));
+
+optNonNull(value).takeUnless(it -> it.isEmpty()).takeIf(it -> it.length() < 100).letIt(it -> System.out.println(it));
+```
+
+#### `lazy` and `lazyOfValue`
+
+`lazy` returns `Lazy` instance with given initializer. `lazyOfValue` returns `Lazy` instance of given value.
+
+```
+Lazy<String> lazy = lazy(() -> {
+  //...
+  return "value";
+});
+
+Lazy<String> lazyOfValue = lazyOfValue("value");
+```
+
+### `Opt` object
 
 The `Opt` monad is similar in meaning to Java `Optional`, but allows the null value.
 
-`Opt` monad contains some `Optional` methods and scope functions methods:
+`Opt` monad contains some `Optional` methods and scope functions methods.
 
 ```
 String result = Opt.of(value).takeIf(it -> it.length() > 10).orElse("");
@@ -225,6 +243,19 @@ String result = Opt.of(value).takeIf(it -> it.length() > 10).orElse("");
 String result = Opt.of(value).takeNonNull().orElseGet(() -> "");
 
 String result = Opt.of(value).takeIf(it -> it.length() > 10).orElseThrow(() -> new IllegalArgumentException());
+```
+
+### `Lazy` object
+
+`Lazy` represents a value with lazy initialization.
+
+```
+Lazy<String> lazy = lazy(() -> {
+  //...
+  return "value";
+});
+
+Lazy<String> lazyOfValue = lazyOfValue("value");
 ```
 
 ### Unchecked functions
@@ -282,7 +313,7 @@ int value = letIntRec(10, (n, func) -> {
 
 ```
 public static String checkNonNullNonEmptyStr(String value) {
-  return let(value)
+  return opt(value)
     .takeNonNull().throwIfEmpty(NullPointerException::new)
     .takeUnless(String::isEmpty).throwIfEmpty(IllegalArgumentException::new)
     .get();

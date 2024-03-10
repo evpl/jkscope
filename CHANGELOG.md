@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.3 (released 10.03.2024)
+
+- added `Lazy` object and `JKScope` methods
+- replaced `let` of value method with `opt` method
+- replaced `asUnchecked` functional interface method with `unchecked` static method due to implementation problems
+
 ## 2.2 (released 25.02.2024)
 
 - renamed `let` interface method to `letIt` (due to the same method name as a static method)
