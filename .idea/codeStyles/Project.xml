@@ -13,6 +13,13 @@
       <option name="RECORD_COMPONENTS_WRAP" value="2" />
       <option name="DECONSTRUCTION_LIST_WRAP" value="0" />
     </JavaCodeStyleSettings>
+    <codeStyleSettings language="Groovy">
+      <indentOptions>
+        <option name="INDENT_SIZE" value="2" />
+        <option name="CONTINUATION_INDENT_SIZE" value="2" />
+        <option name="TAB_SIZE" value="2" />
+      </indentOptions>
+    </codeStyleSettings>
     <codeStyleSettings language="HTML">
       <indentOptions>
         <option name="INDENT_SIZE" value="2" />
