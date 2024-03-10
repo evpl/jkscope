@@ -818,6 +818,13 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
    * Returns a new {@link Lazy} instance that uses the specified initialization function and the
    * {@link Lazy.ThreadSafetyMode#SYNCHRONIZED} thread-safety mode. The returned instance uses itself to synchronize
    * on.
+   * <pre>{@code
+   * Lazy<String> lazy = lazy(() -> {
+   *   //...
+   *   return "value";
+   * });
+   * String value = lazy.get();
+   * }</pre>
    *
    * @param initializer the value initializer
    * @param <V>         the type of the value
@@ -832,6 +839,13 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
    * Returns a new {@link Lazy} instance that uses the specified initialization function and the
    * {@link Lazy.ThreadSafetyMode#SYNCHRONIZED} thread-safety mode. The returned instance uses the specified lock object
    * to synchronize on.
+   * <pre>{@code
+   * Lazy<String> lazy = lazy(new Object(), () -> {
+   *   //...
+   *   return "value";
+   * });
+   * String value = lazy.get();
+   * }</pre>
    *
    * @param lock        the lock object
    * @param initializer the value initializer
@@ -847,6 +861,13 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
   /**
    * Returns a new {@link Lazy} instance that uses the specified initialization function and thread-safety mode. For
    * {@link Lazy.ThreadSafetyMode#SYNCHRONIZED} the returned instance uses itself to synchronize on.
+   * <pre>{@code
+   * Lazy<String> lazy = lazy(Lazy.ThreadSafetyMode.NONE, () -> {
+   *   //...
+   *   return "value";
+   * });
+   * String value = lazy.get();
+   * }</pre>
    *
    * @param threadSafetyMode the thread safety mode
    * @param initializer      the value initializer
@@ -861,6 +882,10 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
 
   /**
    * Returns a new {@link Lazy} instance that is already initialized with the specified value.
+   * <pre>{@code
+   * Lazy<String> lazy = lazyOfValue("value");
+   * String value = lazy.get();
+   * }</pre>
    *
    * @param value the value
    * @param <V>   the type of the value
