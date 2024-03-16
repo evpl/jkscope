@@ -287,6 +287,37 @@ final class JKScopeTest {
   }
 
   @Test
+  void runCatchingWithExceptionTypesStaticMethodThrowsNPEForNullBlockArg() {
+    final ThRunnable<Throwable> block = null;
+    @SuppressWarnings("unchecked")
+    final Class<? extends Throwable>[] exceptionTypes = (Class<? extends Throwable>[]) new Class[]{};
+
+    assertThatThrownBy(() -> JKScope.runCatching(block, exceptionTypes))
+      .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void runCatchingWithExceptionTypesStaticMethodThrowsNPEForNullExceptionTypesArg() {
+    final ThRunnable<Throwable> block = () -> { };
+    final Class<? extends Throwable>[] exceptionTypes = null;
+
+    assertThatThrownBy(() -> JKScope.runCatching(block, exceptionTypes))
+      .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void runCatchingWithExceptionTypesStaticMethodThrowsNPEForNullElementInExceptionTypesArg() {
+    final ThRunnable<Throwable> block = () -> { };
+    @SuppressWarnings("unchecked")
+    final Class<? extends Throwable>[] exceptionTypes = (Class<? extends Throwable>[]) new Class[]{
+      IllegalStateException.class, null, IllegalArgumentException.class
+    };
+
+    assertThatThrownBy(() -> JKScope.runCatching(block, exceptionTypes))
+      .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
   void runRecStaticMethodThrowsNPEForNullArg() {
     final ThConsumer<ThRunnable<Throwable>, Throwable> block = null;
 
@@ -608,6 +639,32 @@ final class JKScopeTest {
     JKScope.runCatching(block);
     assertThat(sideEffect.get())
       .isTrue();
+  }
+
+  @Test
+  void runCatchingWithExceptionTypesStaticMethod() {
+    final AtomicBoolean sideEffect = new AtomicBoolean(false);
+    final ThRunnable<Throwable> block = () -> sideEffect.set(true);
+
+    JKScope.runCatching(block, IllegalArgumentException.class);
+    assertThat(sideEffect.get())
+      .isTrue();
+  }
+
+  @Test
+  void runCatchingWithExceptionTypesStaticMethodThrowsException() {
+    final AtomicBoolean sideEffect = new AtomicBoolean(false);
+    final ThRunnable<Throwable> block = () -> {
+      sideEffect.set(true);
+      throw new IllegalArgumentException();
+    };
+
+    JKScope.runCatching(block, IllegalArgumentException.class);
+    assertThat(sideEffect.get())
+      .isTrue();
+
+    assertThatThrownBy(() -> JKScope.runCatching(block, IllegalStateException.class))
+      .isInstanceOf(IllegalArgumentException.class);
   }
 
   @Test

@@ -75,6 +75,7 @@ import static com.plugatar.jkscope.Utils.uncheckedCast;
  * <ul>
  * <li>{@link #run(ThRunnable)}</li>
  * <li>{@link #runCatching(ThRunnable)}</li>
+ * <li>{@link #runCatching(ThRunnable, Class[])}</li>
  * <li>{@link #runRec(ThConsumer)}</li>
  * <li>{@link #with(Object, ThConsumer)}</li>
  * <li>{@link #withInt(int, ThIntConsumer)}</li>
@@ -196,7 +197,7 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
    * Performs given function block and catching any {@link Throwable} exception.
    * <pre>{@code
    * runCatching(() -> {
-   *   if(new Random().nextInt(0, 100) == 50) {
+   *   if (new Random().nextInt(0, 100) == 50) {
    *     throw new Throwable();
    *   }
    * });
@@ -213,10 +214,51 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
   }
 
   /**
+   * Performs given function block and catching specified {@link Throwable} exceptions.
+   * <pre>{@code
+   * runCatching(() -> {
+   *   if (new Random().nextInt(0, 100) == 50) {
+   *     throw new IllegalStateException();
+   *   } else {
+   *     throw new AssertionError();
+   *   }
+   * }, RuntimeException.class, Error.class);
+   * }</pre>
+   *
+   * @param block          the function block
+   * @param exceptionTypes the exception types array
+   * @throws NullPointerException if {@code block} or {@code exceptionTypes} arg is null or if {@code exceptionTypes}
+   *                              arg array contains null element
+   */
+  @SafeVarargs
+  static void runCatching(final ThRunnable<?> block,
+                          final Class<? extends Throwable>... exceptionTypes) {
+    blockArgNotNull(block);
+    if (exceptionTypes == null) { throw new NullPointerException("exceptionTypes arg is null"); }
+    for (int idx = 0; idx < exceptionTypes.length; idx++) {
+      if (exceptionTypes[idx] == null) {
+        throw new NullPointerException("exceptionTypes arg array contains null element at index " + idx);
+      }
+    }
+    ThBiConsumer.<ThRunnable<?>, Class<? extends Throwable>[]>unchecked((b, t) -> {
+      try {
+        b.run();
+      } catch (final Throwable exception) {
+        for (final Class<? extends Throwable> currentType : t) {
+          if (currentType.isInstance(exception)) {
+            return;
+          }
+        }
+        throw exception;
+      }
+    }).accept(block, exceptionTypes);
+  }
+
+  /**
    * Performs given function block recursively.
    * <pre>{@code
    * runRec(func -> {
-   *   if(new Random().nextInt(0, 100) == 50) {
+   *   if (new Random().nextInt(0, 100) == 50) {
    *     func.run();
    *   }
    * });
