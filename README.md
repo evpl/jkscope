@@ -191,10 +191,11 @@ returning the result.
 
 ```
 int value = letIntRec(10, (n, func) -> {
-  if (n < 2) {
-    return n;
+  if (n <= 1) {
+    return 1;
+  } else {
+    return n * func.apply(n - 1);
   }
-  return func.apply(n - 1) + func.apply(n - 2);
 });
 ```
 
@@ -302,10 +303,11 @@ new MyBuilder()
 
 ```
 int value = letIntRec(10, (n, func) -> {
-  if (n < 2) {
-    return n;
+  if (n <= 1) {
+    return 1;
+  } else {
+    return n * func.apply(n - 1);
   }
-  return func.apply(n - 1) + func.apply(n - 2);
 });
 ```
 

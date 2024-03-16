@@ -120,10 +120,11 @@ import static com.plugatar.jkscope.Utils.uncheckedCast;
  * opt("value").takeUnless(it -> it.isEmpty()).takeIf(it -> it.length() < 100).letIt(it -> System.out.println(it));
  *
  * int value = letIntRec(10, (n, func) -> {
- *   if (n < 2) {
- *     return n;
+ *   if (n <= 1) {
+ *     return 1;
+ *   } else {
+ *     return n * func.apply(n - 1);
  *   }
- *   return func.apply(n - 1) + func.apply(n - 2);
  * });
  *
  * with(new MyObject(), it -> {
@@ -573,10 +574,11 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
    * Performs given function block recursively and returns result.
    * <pre>{@code
    * Integer value = letRec(10, (n, func) -> {
-   *   if (n < 2) {
-   *     return n;
+   *   if (n <= 1) {
+   *     return 1;
+   *   } else {
+   *     return n * func.apply(n - 1);
    *   }
-   *   return func.apply(n - 1) + func.apply(n - 2);
    * });
    * }</pre>
    *
@@ -598,10 +600,11 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
    * Performs given function block recursively and returns {@code int}-valued result.
    * <pre>{@code
    * int value = letIntRec(10, (n, func) -> {
-   *   if (n < 2) {
-   *     return n;
+   *   if (n <= 1) {
+   *     return 1;
+   *   } else {
+   *     return n * func.apply(n - 1);
    *   }
-   *   return func.apply(n - 1) + func.apply(n - 2);
    * });
    * }</pre>
    *
@@ -621,11 +624,12 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
   /**
    * Performs given function block recursively and returns {@code long}-valued result.
    * <pre>{@code
-   * long value = letLongRec(10L, (n, func) -> {
-   *   if (n < 2L) {
-   *     return n;
+   * long value = letLongRec(10, (n, func) -> {
+   *   if (n <= 1L) {
+   *     return 1L;
+   *   } else {
+   *     return n * func.apply(n - 1L);
    *   }
-   *   return func.apply(n - 1L) + func.apply(n - 2L);
    * });
    * }</pre>
    *
@@ -646,10 +650,11 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
    * Performs given function block recursively and returns {@code double}-valued result.
    * <pre>{@code
    * double value = letDoubleRec(10.0, (n, func) -> {
-   *   if (n < 2.0) {
-   *     return n;
+   *   if (n <= 1.0) {
+   *     return 1.0;
+   *   } else {
+   *     return n * func.apply(n - 1.0);
    *   }
-   *   return func.apply(n - 1.0) + func.apply(n - 2.0);
    * });
    * }</pre>
    *
