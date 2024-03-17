@@ -362,7 +362,25 @@ final class JKScopeTest {
   }
 
   @Test
-  void withResourceMethodThrowsNPEForNullArg() {
+  void withResourceMethodThrowsNPEForNullInitializerArg() {
+    final ThSupplier<AutoCloseable, Throwable> initializer = null;
+    final ThConsumer<Object, Throwable> block = v -> { };
+
+    assertThatThrownBy(() -> JKScope.withResourceInit(initializer, block))
+      .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void withResourceMethodThrowsNPEForNullBlockArg() {
+    final ThSupplier<AutoCloseable, Throwable> initializer = () -> new AutoCloseableImpl();
+    final ThConsumer<Object, Throwable> block = null;
+
+    assertThatThrownBy(() -> JKScope.withResourceInit(initializer, block))
+      .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void withResourceInitMethodThrowsNPEForNullArg() {
     final AutoCloseable value = new AutoCloseableImpl();
     final ThConsumer<Object, Throwable> block = null;
 
@@ -537,6 +555,24 @@ final class JKScopeTest {
     final ThFunction<Object, Object, Throwable> block = null;
 
     assertThatThrownBy(() -> JKScope.letWithResource(value, block))
+      .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void letWithResourceInitMethodThrowsNPEForNullInitializerArg() {
+    final ThSupplier<AutoCloseable, Throwable> initializer = null;
+    final ThFunction<Object, Object, Throwable> block = v -> new Object();
+
+    assertThatThrownBy(() -> JKScope.letWithResourceInit(initializer, block))
+      .isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void letWithResourceInitMethodThrowsNPEForNullBlockArg() {
+    final ThSupplier<AutoCloseable, Throwable> initializer = () -> new AutoCloseableImpl();
+    final ThFunction<Object, Object, Throwable> block = null;
+
+    assertThatThrownBy(() -> JKScope.letWithResourceInit(initializer, block))
       .isInstanceOf(NullPointerException.class);
   }
 
@@ -798,6 +834,20 @@ final class JKScopeTest {
 
     assertThatThrownBy(() -> JKScope.withResource(value, block))
       .isSameAs(throwable);
+    assertThat(value.isClosed())
+      .isTrue();
+  }
+
+  @Test
+  void withResourceInitMethod() {
+    final AutoCloseableImpl value = new AutoCloseableImpl();
+    final AtomicReference<Object> valueRef = new AtomicReference<>();
+    final ThSupplier<AutoCloseable, Throwable> initializer = () -> value;
+    final ThConsumer<Object, Throwable> block = arg -> valueRef.set(arg);
+
+    JKScope.withResourceInit(initializer, block);
+    assertThat(valueRef.get())
+      .isSameAs(value);
     assertThat(value.isClosed())
       .isTrue();
   }
@@ -1308,6 +1358,25 @@ final class JKScopeTest {
 
     assertThatThrownBy(() -> JKScope.letWithResource(value, block))
       .isSameAs(throwable);
+    assertThat(value.isClosed())
+      .isTrue();
+  }
+
+  @Test
+  void letWithResourceInitMethod() {
+    final AutoCloseableImpl value = new AutoCloseableImpl();
+    final Object result = new Object();
+    final AtomicReference<Object> valueRef = new AtomicReference<>();
+    final ThSupplier<AutoCloseable, Throwable> initializer = () -> value;
+    final ThFunction<Object, Object, Throwable> block = arg -> {
+      valueRef.set(arg);
+      return result;
+    };
+
+    assertThat(JKScope.letWithResourceInit(initializer, block))
+      .isSameAs(result);
+    assertThat(valueRef.get())
+      .isSameAs(value);
     assertThat(value.isClosed())
       .isTrue();
   }

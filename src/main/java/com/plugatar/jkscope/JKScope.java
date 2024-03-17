@@ -43,6 +43,7 @@ import com.plugatar.jkscope.function.ThTriFunction;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.plugatar.jkscope.Utils.blockArgNotNull;
+import static com.plugatar.jkscope.Utils.initializerArgNotNull;
 import static com.plugatar.jkscope.Utils.uncheckedCast;
 
 /**
@@ -82,6 +83,7 @@ import static com.plugatar.jkscope.Utils.uncheckedCast;
  * <li>{@link #withLong(long, ThLongConsumer)}</li>
  * <li>{@link #withDouble(double, ThDoubleConsumer)}</li>
  * <li>{@link #withResource(AutoCloseable, ThConsumer)}</li>
+ * <li>{@link #withResourceInit(ThSupplier, ThConsumer)}</li>
  * <li>{@link #with(Object, Object, ThBiConsumer)}</li>
  * <li>{@link #with(Object, Object, Object, ThTriConsumer)}</li>
  * <li>{@link #let(ThSupplier)}</li>
@@ -101,6 +103,7 @@ import static com.plugatar.jkscope.Utils.uncheckedCast;
  * <li>{@link #letLongWith(Object, ThToLongFunction)}</li>
  * <li>{@link #letDoubleWith(Object, ThToDoubleFunction)}</li>
  * <li>{@link #letWithResource(AutoCloseable, ThFunction)}</li>
+ * <li>{@link #letWithResourceInit(ThSupplier, ThFunction)}</li>
  * <li>{@link #letWith(Object, Object, ThBiFunction)}</li>
  * <li>{@link #letWith(Object, Object, Object, ThTriFunction)}</li>
  * <li>{@link #opt(Object)}</li>
@@ -235,7 +238,9 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
   static void runCatching(final ThRunnable<?> block,
                           final Class<? extends Throwable>... exceptionTypes) {
     blockArgNotNull(block);
-    if (exceptionTypes == null) { throw new NullPointerException("exceptionTypes arg is null"); }
+    if (exceptionTypes == null) {
+      throw new NullPointerException("exceptionTypes arg is null");
+    }
     for (int idx = 0; idx < exceptionTypes.length; idx++) {
       if (exceptionTypes[idx] == null) {
         throw new NullPointerException("exceptionTypes arg array contains null element at index " + idx);
@@ -351,7 +356,9 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
   /**
    * Performs given function block on given {@link AutoCloseable} value and close this value.
    * <pre>{@code
-   * with(new MyResource(), it -> System.out.println(it.getValue()));
+   * withResource(new PrintWriter("C:\\file.txt"), writer -> {
+   *   writer.println("text");
+   * });
    * }</pre>
    *
    * @param value the value
@@ -367,6 +374,30 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
         b.accept(resource);
       }
     }).accept(value, block);
+  }
+
+  /**
+   * Performs given function block on specified by initializer {@link AutoCloseable} value and close this value.
+   * <pre>{@code
+   * withResourceInit(() -> new PrintWriter("C:\\file.txt"), writer -> {
+   *   writer.println("text");
+   * });
+   * }</pre>
+   *
+   * @param initializer the value initializer
+   * @param block       the function block
+   * @param <V>         the type of the value
+   * @throws NullPointerException if {@code initializer} or {@code block} arg is null
+   */
+  static <V extends AutoCloseable> void withResourceInit(final ThSupplier<? extends V, ?> initializer,
+                                                         final ThConsumer<? super V, ?> block) {
+    initializerArgNotNull(initializer);
+    blockArgNotNull(block);
+    ThBiConsumer.<ThSupplier<? extends V, ?>, ThConsumer<? super V, ?>>unchecked((i, b) -> {
+      try (final V resource = i.get()) {
+        b.accept(resource);
+      }
+    }).accept(initializer, block);
   }
 
   /**
@@ -756,7 +787,10 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
   /**
    * Performs given function block on {@link AutoCloseable} value, close this value and returns result.
    * <pre>{@code
-   * String value = letWith(new MyResource(), it -> it.getValue());
+   * String value = letWithResource(new PrintWriter("C:\\file.txt"), writer -> {
+   *   writer.println("text");
+   *   return "value";
+   * });
    * }</pre>
    *
    * @param value the value
@@ -774,6 +808,34 @@ public interface JKScope<V extends JKScope<V>> extends BaseScope<V, V> {
         return b.apply(resource);
       }
     }).apply(value, block);
+  }
+
+  /**
+   * Performs given function block on specified by initializer {@link AutoCloseable}, close this value and returns
+   * result.
+   * <pre>{@code
+   * String value = letWithResourceInit(() -> new PrintWriter("C:\\file.txt"), writer -> {
+   *   writer.println("text");
+   *   return "value";
+   * });
+   * }</pre>
+   *
+   * @param initializer the value initializer
+   * @param block       the function block
+   * @param <V>         the type of the value
+   * @param <R>         the type of the result
+   * @return result
+   * @throws NullPointerException if {@code initializer} or {@code block} arg is null
+   */
+  static <V extends AutoCloseable, R> R letWithResourceInit(final ThSupplier<? extends V, ?> initializer,
+                                                            final ThFunction<? super V, ? extends R, ?> block) {
+    initializerArgNotNull(initializer);
+    blockArgNotNull(block);
+    return ThBiFunction.<ThSupplier<? extends V, ?>, ThFunction<? super V, ? extends R, ?>, R>unchecked((i, b) -> {
+      try (final V resource = i.get()) {
+        return b.apply(resource);
+      }
+    }).apply(initializer, block);
   }
 
   /**

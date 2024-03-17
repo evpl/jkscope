@@ -27,6 +27,12 @@ final class Utils {
   private Utils() {
   }
 
+  static void initializerArgNotNull(final Object block) {
+    if (block == null) {
+      throw new NullPointerException("initializer arg is null");
+    }
+  }
+
   static void blockArgNotNull(final Object block) {
     if (block == null) {
       throw new NullPointerException("block arg is null");
