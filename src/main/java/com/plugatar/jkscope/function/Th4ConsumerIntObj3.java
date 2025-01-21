@@ -21,33 +21,40 @@ import static com.plugatar.jkscope.function.Utils.consumerArgNotNull;
 import static com.plugatar.jkscope.function.Utils.originArgNotNull;
 
 /**
- * The {@link java.util.function.Consumer} specialization with {@code [Object->void]} signature that might throw an
- * exception.
+ * The {@link java.util.function.Consumer} specialization with {@code [int,Object,Object,Object->void]} signature that
+ * might throw an exception.
  *
- * @param <T> the type of the input argument
- * @param <E> the type of the throwing exception
+ * @param <T1> the type of the second input argument
+ * @param <T2> the type of the third input argument
+ * @param <T3> the type of the fourth input argument
+ * @param <E>  the type of the throwing exception
  */
 @FunctionalInterface
-public interface ThConsumer<T, E extends Throwable> {
+public interface Th4ConsumerIntObj3<T1, T2, T3, E extends Throwable> {
 
   /**
-   * Performs this operation on the given argument.
+   * Performs this operation on the given arguments.
    *
-   * @param t the input argument
+   * @param value the first input argument
+   * @param t1    the second input argument
+   * @param t2    the third input argument
+   * @param t3    the fourth input argument
    * @throws E if consumer threw exception
    */
-  void accept(T t) throws E;
+  void accept(int value, T1 t1, T2 t2, T3 t3) throws E;
 
   /**
    * Returns given consumer.
    *
    * @param consumer the consumer
-   * @param <T>      the type of the input argument
+   * @param <T1>     the type of the second input argument
+   * @param <T2>     the type of the third input argument
+   * @param <T3>     the type of the fourth input argument
    * @param <E>      the type of the throwing exception
-   * @return unchecked consumer
+   * @return consumer
    * @throws NullPointerException if {@code consumer} arg is {@code null}
    */
-  static <T, E extends Throwable> ThConsumer<T, E> of(final ThConsumer<? super T, ? extends E> consumer) {
+  static <T1, T2, T3, E extends Throwable> Th4ConsumerIntObj3<T1, T2, T3, E> of(final Th4ConsumerIntObj3<? super T1, ? super T2, ? super T3, ? extends E> consumer) {
     consumerArgNotNull(consumer);
     return Cast.unsafe(consumer);
   }
@@ -56,11 +63,13 @@ public interface ThConsumer<T, E extends Throwable> {
    * Returns given consumer as an unchecked consumer.
    *
    * @param origin the origin consumer
-   * @param <T>    the type of the input argument
+   * @param <T1>   the type of the second input argument
+   * @param <T2>   the type of the third input argument
+   * @param <T3>   the type of the fourth input argument
    * @return unchecked consumer
    * @throws NullPointerException if {@code origin} arg is {@code null}
    */
-  static <T> ThConsumer<T, RuntimeException> unchecked(final ThConsumer<? super T, ?> origin) {
+  static <T1, T2, T3> Th4ConsumerIntObj3<T1, T2, T3, RuntimeException> unchecked(final Th4ConsumerIntObj3<? super T1, ? super T2, ? super T3, ?> origin) {
     originArgNotNull(origin);
     return Cast.unsafe(origin);
   }

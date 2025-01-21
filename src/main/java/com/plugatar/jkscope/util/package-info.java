@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 /**
- * Functions.
+ * Common utils.
  */
-package com.plugatar.jkscope.function;
+package com.plugatar.jkscope.util;

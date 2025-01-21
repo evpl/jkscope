@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Evgenii Plugatar
+ * Copyright 2025 Evgenii Plugatar
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,38 +15,53 @@
  */
 package com.plugatar.jkscope.function;
 
+import com.plugatar.jkscope.util.Cast;
+
+import static com.plugatar.jkscope.function.Utils.consumerArgNotNull;
 import static com.plugatar.jkscope.function.Utils.originArgNotNull;
-import static com.plugatar.jkscope.function.Utils.uncheckedCast;
 
 /**
- * The {@link java.util.function.Predicate} specialization that might throw an exception.
+ * The {@link java.util.function.Predicate} specialization with {@code [Object->boolean]} signature that might throw an
+ * exception.
  *
  * @param <T> the type of the input argument
  * @param <E> the type of the throwing exception
- * @see java.util.function.Predicate
  */
 @FunctionalInterface
 public interface ThPredicate<T, E extends Throwable> {
 
   /**
-   * Applies this predicate to the given argument.
+   * Evaluates this predicate on the given argument.
    *
    * @param t the input argument
-   * @return result
-   * @throws E if function threw exception
+   * @throws E if predicate threw exception
    */
   boolean test(T t) throws E;
 
   /**
-   * Returns given supplier as an unchecked supplier.
+   * Returns given predicate.
    *
-   * @param origin the origin supplier
+   * @param consumer the predicate
+   * @param <T>      the type of the input argument
+   * @param <E>      the type of the throwing exception
+   * @return unchecked predicate
+   * @throws NullPointerException if {@code consumer} arg is {@code null}
+   */
+  static <T, E extends Throwable> ThPredicate<T, E> of(final ThPredicate<? super T, ? extends E> consumer) {
+    consumerArgNotNull(consumer);
+    return Cast.unsafe(consumer);
+  }
+
+  /**
+   * Returns given consumer as an unchecked predicate.
+   *
+   * @param origin the origin predicate
    * @param <T>    the type of the input argument
-   * @return unchecked supplier
-   * @throws NullPointerException if {@code origin} arg is null
+   * @return unchecked predicate
+   * @throws NullPointerException if {@code origin} arg is {@code null}
    */
   static <T> ThPredicate<T, RuntimeException> unchecked(final ThPredicate<? super T, ?> origin) {
     originArgNotNull(origin);
-    return uncheckedCast(origin);
+    return Cast.unsafe(origin);
   }
 }

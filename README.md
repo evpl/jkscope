@@ -17,36 +17,29 @@ Java scope functions inspired by Kotlin
 * [Motivation](#motivation)
 * [How to use](#how-to-use)
 * [Docs](#docs)
-  * [JKScope interface methods](#jkscope-interface-methods)
-    * [`letIt` and `also`](#letit-and-also)
-    * [`takeIf` and `takeUnless`](#takeif-and-takeunless)
-    * [`letOut`](#letout)
-    * [`letOpt`](#letopt)
-  * [JKScope static methods](#jkscope-static-methods)
-    * [`run`, `runCatching` and `runRec`](#run-runcatching-and-runrec)
-    * [`with`, `withInt`, `withLong`, `withDouble` and `withResource`](#with-withint-withlong-withdouble-and-withresource)
-    * [`let` variations](#let-variations)
-    * [`opt` and `optNonNull`](#opt-and-optnonnull)
-    * [`lazy` and `lazyOfValue`](#lazy-and-lazyofvalue)
-  * [`Opt` object](#opt-object)
-  * [`Lazy` object](#lazy-object)
+  * [JKScope methods](#jkscope-methods)
+    * [`with` methods](#with-methods)
+    * [`let` methods](#let-methods)
+    * [`it` methods](#it-methods)
+    * [`use` methods](#use-methods)
+    * [`repeat` methods](#repeat-methods)
+    * [`iterateOver` methods](#iterateOver-methods)
+    * [`iterate` methods](#iterate-methods)
+    * [`recur` methods](#recur-methods)
+    * [`lazy` methods](#lazy-methods)
   * [Unchecked functions](#unchecked-functions)
   * [Examples](#examples)
     * [Collection initialization](#collection-initialization)
     * [Argument in a method chain](#argument-in-a-method-chain)
     * [Nth Fibonacci number](#nth-fibonacci-number)
-    * [Method argument processing](#method-argument-processing)
-    * [Safe resources](#safe-resources)
 
 ## Motivation
 
-Inspired by the [Kotlin scope function](https://kotlinlang.org/docs/scope-functions.html) I want to make my Java code
-more structured and readable.
+Set of utility methods. Inspired by the [Kotlin scope function](https://kotlinlang.org/docs/scope-functions.html).
 
 ## How to use
 
-Java 8+ version required. The library has no dependencies. All you need is this (get the latest
-version [here](https://github.com/evpl/jkscope/releases)).
+Java 8+ version required. The library has no dependencies.
 
 Maven:
 
@@ -55,7 +48,7 @@ Maven:
 <dependency>
   <groupId>com.plugatar.jkscope</groupId>
   <artifactId>jkscope</artifactId>
-  <version>2.3</version>
+  <version>3.0</version>
   <scope>compile</scope>
 </dependency>
 ```
@@ -64,58 +57,11 @@ Gradle:
 
 ```groovy
 dependencies {
-  implementation 'com.plugatar.jkscope:jkscope:2.3'
+  implementation 'com.plugatar.jkscope:jkscope:3.0'
 }
 ```
 
 ## Docs
-
-### JKScope interface methods
-
-You need to implement `JKScope` interface to use these methods.
-
-```
-class MyObject implements JKScope<MyObject> { }
-```
-
-#### `letIt` and `also`
-
-Both methods are the same and differ in the name only. Methods perform the function block on this object and return this
-object.
-
-```
-MyDTO myDTO = new MyDTO().letIt(it -> {
-  it.setProperty("value");
-  it.setAnother("another value");
-});
-
-MyResource myResource = new MyResource().also(it -> it.init());
-```
-
-#### `takeIf` and `takeUnless`
-
-`takeIf` method performs the function block on this object and returns `Opt` monad of this object if the condition is
-met, or it returns empty `Opt` instance if the condition is not met. And `takeUnless` method has reverse logic.
-
-```
-new MyObject().takeIf(it -> it.getInt() > 10).takeUnless(it -> it.getInt() > 20).letIt(it -> System.out.println(it));
-```
-
-#### `letOut`
-
-`letOut` method performs given function block on this object and returns result.
-
-```
-Integer value = new MyObject().letOut(it -> it.getInt());
-```
-
-#### `letOpt`
-
-`letOpt` method performs given function block on this object and returns `Opt` monad of result.
-
-```
-new MyObject().letOpt(it -> it.getInt()).takeIf(it -> it > 10).letIt(it -> System.out.println(it));
-```
 
 ### JKScope static methods
 
@@ -125,143 +71,371 @@ Import static methods you need or import them all at once.
 import static com.plugatar.jkscope.JKScope.*;
 ```
 
-#### `run`, `runCatching` and `runRec`
+#### `with` methods
 
-`run` just runs given function block, `runCatching` runs ignore any Throwable, `runRec` runs function block allowing
-yourself to be called recursively.
+Performs given function block on given values (0 zero to 5).
 
-`run` method simply runs given function block, `runCatching` runs ignore any thrown Throwable, `runRec` runs function
-block, allowing itself to be called recursively.
-
-```
-run(() -> {
-  System.out.println("Hi");
-});
-
-runCatching(() -> {
-  System.out.println("Hi");
-});
-
-runRec(func -> {
-  if (new Random().nextInt(0, 100) == 50) {
-    func.run();
-  }
-});
-```
-
-#### `with`, `withInt`, `withLong`, `withDouble` and `withResource`
-
-These methods perform given function block on given values.
+* `with(ThRunnable)`
+* `with(Object, ThConsumer)`
+* `with(Object, Object, Th2Consumer)`
+* `with(Object, Object, Object, Th3Consumer)`
+* `with(Object, Object, Object, Object, Th4Consumer)`
+* `with(Object, Object, Object, Object, Object, Th5Consumer)`
 
 ```
-with(value, it -> {
-  System.out.println(value);
+with(() -> {
+  System.out.println("Hello");
 });
 
-with(value1, value2, (v1, v2) -> {
+with("value", v -> {
+  System.out.println(v);
+});
+
+with("value1", "value2", (v1, v2) -> {
   System.out.println(v1);
   System.out.println(v2);
 });
 ```
 
-`withResource` method does the same thing, but with a `AutoCloseable` resource and closes this resource.
+#### `let` methods
 
-#### `let` variations
+Performs given function block on given values (from 0 to 5) and returns result.
 
-`let`, `letInt`, `letLong` and `letDouble` returns result of function block.
+* `let(ThSupplier)`
+* `let(Object, ThFunction)`
+* `let(Object, Object, Th2Function)`
+* `let(Object, Object, Object, Th3Function)`
+* `let(Object, Object, Object, Object, Th4Function)`
+* `let(Object, Object, Object, Object, Object, Th5Function)`
 
 ```
-String value = let(() -> {
+let(() -> {
+  return "Hello";
+});
+
+String result = let("value", v -> {
+  System.out.println(v);
+  return v.toUpperCase();
+});
+
+String result = let("value1", "value2", (v1, v2) -> {
+  System.out.println(v1);
+  System.out.println(v2);
+  return v1.toUpperCase() + v2.toUpperCase();
+});
+```
+
+#### `it` methods
+
+Performs given function block on given value (and from 0 to 4 additional values) and returns this (first) value.
+
+* `it(ThSupplier)`
+* `it(Object, ThConsumer)`
+* `it(Object, Object, Th2Consumer)`
+* `it(Object, Object, Object, Th3Consumer)`
+* `it(Object, Object, Object, Object, Th4Consumer)`
+* `it(Object, Object, Object, Object, Object, Th5Consumer)`
+
+```
+String value = it(() -> {
+  return "Hello";
+});
+
+String result = it("value", v -> {
+  System.out.println(v);
+});
+
+String result = it("value1", "value2", (v1, v2) -> {
+  System.out.println(v1);
+  System.out.println(v2);
+});
+```
+
+#### `use` methods
+
+Performs given function block (with additional given resources from 0 to 3), then closes all resources in ResourceDeque
+and returns result if necessary.
+
+* `use(ThConsumer)`
+* `use(AutoCloseable, ThConsumer)`
+* `use(AutoCloseable, Th2Consumer)`
+* `use(AutoCloseable, AutoCloseable, Th2Consumer)`
+* `use(AutoCloseable, AutoCloseable, Th3Consumer)`
+* `use(AutoCloseable, AutoCloseable, AutoCloseable, Th3Consumer)`
+* `use(AutoCloseable, AutoCloseable, AutoCloseable, Th4Consumer)`
+* `use(ThFunction)`
+* `use(AutoCloseable, ThFunction)`
+* `use(AutoCloseable, Th2Function)`
+* `use(AutoCloseable, AutoCloseable, Th2Function)`
+* `use(AutoCloseable, AutoCloseable, Th3Function)`
+* `use(AutoCloseable, AutoCloseable, AutoCloseable, Th3Function)`
+* `use(AutoCloseable, AutoCloseable, AutoCloseable, Th4Function)`
+
+```
+use(resources -> {
+  AutoCloseableImpl1 ac1 = resources.push(new AutoCloseableImpl1());
+  AutoCloseableImpl2 ac2 = resources.push(new AutoCloseableImpl2());
   //...
-  return "val";
+});
+
+String result = use(resources -> {
+  AutoCloseableImpl1 ac1 = resources.push(new AutoCloseableImpl1());
+  AutoCloseableImpl2 ac2 = resources.push(new AutoCloseableImpl2());
+  //...
+  return "result";
+});
+
+use(new AutoCloseableImpl1(), new AutoCloseableImpl2(), (ac1, ac2, resources) -> {
+  AutoCloseableImpl3 ac3 = resources.push(new AutoCloseableImpl3());
+  AutoCloseableImpl4 ac4 = resources.push(new AutoCloseableImpl4());
+  //...
+});
+
+String result = use(new AutoCloseableImpl1(), new AutoCloseableImpl2(), (ac1, ac2, resources) -> {
+  AutoCloseableImpl3 ac3 = resources.push(new AutoCloseableImpl3());
+  AutoCloseableImpl4 ac4 = resources.push(new AutoCloseableImpl4());
+  //...
+  return "result";
 });
 ```
 
-`let`, `letInt`, `letLong` and `letDouble` methods can also receive a value, process it using a function block, and
-return that value.
+#### `repeat` methods
+
+Performs given function block specified number of times (with additional values from 0 to 3) and returns accumulator
+value if specified.
+
+* `repeat(int, ThRunnable)`
+* `repeat(int, ThConsumerInt)`
+* `repeat(int, Object, ThConsumer)`
+* `repeat(int, Object, Th2ConsumerIntObj)`
+* `repeat1(int, Object, ThConsumer)`
+* `repeat1(int, Object, Th2ConsumerIntObj)`
+* `repeat1(int, Object, Object, Th2Consumer)`
+* `repeat1(int, Object, Object, Th3ConsumerIntObj2)`
+* `repeat2(int, Object, Object, Th2Consumer)`
+* `repeat2(int, Object, Object, Th3ConsumerIntObj2)`
+* `repeat2(int, Object, Object, Object, Th3Consumer)`
+* `repeat2(int, Object, Object, Object, Th4ConsumerIntObj3)`
+* `repeat3(int, Object, Object, Object, Th3Consumer)`
+* `repeat3(int, Object, Object, Object, Th4ConsumerIntObj3)`
+* `repeat3(int, Object, Object, Object, Object, Th4Consumer)`
+* `repeat3(int, Object, Object, Object, Object, Th5ConsumerIntObj4)`
 
 ```
-String value = let("val", it -> {
-  System.out.println(it);
+repeat(10, () -> {
+  System.out.println("Hello");
+});
+
+repeat(10, idx -> {
+  System.out.println("Hello " + idx);
+});
+
+List<String> result = repeat(10, new ArrayList<>(), list -> {
+  list.add("Hello");
+});
+
+List<String> result = repeat(10, new ArrayList<>(), (idx, list) -> {
+  list.add("Hello " + idx);
 });
 ```
 
-`letRec`, `letIntRec`, `letLongRec` and `letDoubleRec` accept initial value and allow you to process it recursively
-returning the result.
+#### `iterateOver` methods
+
+Performs given function block for every element of given object and returns accumulator value if specified.
+
+* `iterateOver(Object[], ThConsumer)`
+* `iterateOver(Object[], Th2ConsumerIntObj)`
+* `iterateOver(Object[], Object, Th2Consumer)`
+* `iterateOver(Object[], Object, Th3ConsumerIntObj2)`
+* `iterateOver(Iterable, ThConsumer)`
+* `iterateOver(Iterable, Th2ConsumerIntObj)`
+* `iterateOver(Iterable, Object, Th2Consumer)`
+* `iterateOver(Iterable, Object, Th3ConsumerIntObj2)`
+* `iterateOver(Iterator, ThConsumer)`
+* `iterateOver(Iterator, Th2ConsumerIntObj)`
+* `iterateOver(Iterator, Object, Th2Consumer)`
+* `iterateOver(Iterator, Object, Th3ConsumerIntObj2)`
+* `iterateOver(Map, Th2Consumer)`
+* `iterateOver(Map, Th3ConsumerIntObj2)`
+* `iterateOver(Map, Object, Th3Consumer)`
+* `iterateOver(Map, Object, Th4ConsumerIntObj3)`
 
 ```
-int value = letIntRec(10, (n, func) -> {
-  if (n <= 1) {
-    return 1;
-  } else {
-    return n * func.apply(n - 1);
+List<String> iterable = List.of("a", "b", "c");
+
+iterateOver(iterable, element -> {
+  System.out.println("element: " + element);
+});
+
+iterateOver(iterable, (idx, element) -> {
+  System.out.println("element " + idx + ": " + element);
+});
+
+List<String> result1 = iterateOver(iterable, new ArrayList<>(), (element, acc) -> {
+  acc.add(element);
+});
+
+List<String> result2 = iterateOver(iterable, new ArrayList<>(), (idx, element, acc) -> {
+  acc.add(idx + " " + element);
+});
+
+Map<Integer, String> result3 = iterateOver(list, new HashMap<>(), (idx, element, map) ->
+  map.put(idx, element)
+);
+```
+
+#### `iterate` methods
+
+Performs given function block with manual selection of the next elements and returns accumulator value if specified.
+
+* `iterate1(Object, Th2Consumer)`
+* `iterate1(Object, Th3ConsumerIntObj2)`
+* `iterate1(Object, Object, Th3Consumer)`
+* `iterate1(Object, Object, Th4ConsumerIntObj3)`
+* `iterate2(Object, Object, Th3Consumer)`
+* `iterate2(Object, Object, Th4ConsumerIntObj3)`
+* `iterate2(Object, Object, Object, Th4Consumer)`
+* `iterate2(Object, Object, Object, Th5ConsumerIntObj4)`
+* `iterate3(Object, Object, Object, Th4Consumer)`
+* `iterate3(Object, Object, Object, Th5ConsumerIntObj4)`
+* `iterate3(Object, Object, Object, Object, Th5Consumer)`
+* `iterate3(Object, Object, Object, Object, Th6ConsumerIntObj5)`
+
+```
+iterate1(5, (value, nextValues) -> {
+  if (value < 10) {
+    System.out.println(value);
+    nextValues.push(value + 1);
+  }
+});
+
+iterate1(5, (idx, value, nextValues) -> {
+  if (idx < 100 && value < 10) {
+    System.out.println(value);
+    nextValues.push(value + 1);
+  }
+});
+
+List<Integer> result1 = iterate1(5, new ArrayList<>(), (value, acc, nextValues) -> {
+  if (value < 10) {
+    acc.add(value);
+    nextValues.push(value + 1);
+  }
+});
+
+List<Integer> result2 = iterate1(5, new ArrayList<>(), (idx, value, acc, nextValues) -> {
+  if (idx < 100 && value < 10) {
+    acc.add(value);
+    nextValues.push(value + 1);
   }
 });
 ```
 
-`letWith`, `letIntWith`, `letLongWith`, `letDoubleWith` methods accept values and returning the result of function
-block.
+#### `recur` methods
+
+Performs given function block recursively and returns block result or accumulator value if specified.
+
+* `recur(ThConsumer)`
+* `recur(Th2Consumer)`
+* `recur(Object, Th2Consumer)`
+* `recur(Object, Th3Consumer)`
+* `recur1(Object, Th2Consumer)`
+* `recur1(Object, Th3Consumer)`
+* `recur1(Object, Object, Th3Consumer)`
+* `recur1(Object, Object, Th4Consumer)`
+* `recur2(Object, Object, Th3Consumer)`
+* `recur2(Object, Object, Th4Consumer)`
+* `recur2(Object, Object, Object, Th4Consumer)`
+* `recur2(Object, Object, Object, Th5Consumer)`
+* `recur3(Object, Object, Object, Th4Consumer)`
+* `recur3(Object, Object, Object, Th5Consumer)`
+* `recur3(Object, Object, Object, Object, Th5Consumer)`
+* `recur3(Object, Object, Object, Object, Th6Consumer)`
+* `recur(ThFunction)`
+* `recur(Th2Function)`
+* `recur1(Object, Th2Function)`
+* `recur1(Object, Th3Function)`
+* `recur2(Object, Object, Th3Function)`
+* `recur2(Object, Object, Th4Function)`
+* `recur3(Object, Object, Object, Th4Function)`
+* `recur3(Object, Object, Object, Th5Function)`
 
 ```
-int value = letWith("42", it -> Integer.valueOf(it));
-```
-
-`letWithResource` method does the same thing, but with a `AutoCloseable` resource and closes this resource.
-
-#### `opt` and `optNonNull`
-
-`opt` returns `Opt` instance of given value, `optNonNull` returns `Opt` instance of given value of given value or
-empty `Opt` instance if given value is null.
-
-```
-opt(value).takeNonNull().takeUnless(it -> it.isEmpty()).takeIf(it -> it.length() < 100).letIt(it -> System.out.println(it));
-
-optNonNull(value).takeUnless(it -> it.isEmpty()).takeIf(it -> it.length() < 100).letIt(it -> System.out.println(it));
-```
-
-#### `lazy` and `lazyOfValue`
-
-`lazy` returns `Lazy` instance with given initializer. `lazyOfValue` returns `Lazy` instance of given value.
-
-```
-Lazy<String> lazy = lazy(() -> {
-  //...
-  return "value";
+recur1(5, (value, self) -> {
+  if (value < 10) {
+    System.out.println(value);
+    self.accept(value + 1);
+  }
 });
 
-Lazy<String> lazyOfValue = lazyOfValue("value");
-```
-
-### `Opt` object
-
-The `Opt` monad is similar in meaning to Java `Optional`, but allows the null value.
-
-`Opt` monad contains some `Optional` methods and scope functions methods.
-
-```
-String result = Opt.of(value).takeIf(it -> it.length() > 10).orElse("");
-
-String result = Opt.of(value).takeNonNull().orElseGet(() -> "");
-
-String result = Opt.of(value).takeIf(it -> it.length() > 10).orElseThrow(() -> new IllegalArgumentException());
-```
-
-### `Lazy` object
-
-`Lazy` represents a value with lazy initialization.
-
-```
-Lazy<String> lazy = lazy(() -> {
-  //...
-  return "value";
+recur1(5, (depth, value, self) -> {
+  if (depth.current() < 100 && value < 10) {
+    System.out.println(value);
+    self.accept(value + 1);
+  }
 });
 
-Lazy<String> lazyOfValue = lazyOfValue("value");
+List<Integer> result1 = recur1(5, new ArrayList<>(), (value, acc, self) -> {
+  if (value < 10) {
+    acc.add(value);
+    self.accept(value + 1);
+  }
+});
+
+List<Integer> result2 = recur1(5, new ArrayList<>(), (depth, value, acc, self) -> {
+  if (depth.current() < 50 && value < 10) {
+    acc.add(value);
+    self.accept(value + 1);
+  }
+});
+
+Integer result3 = recur1(5, (value, self) -> {
+  if (value < 10) {
+    return self.apply(value + 1);
+  }
+  return value;
+});
+
+Integer result4 = recur1(5, (depth, value, self) -> {
+  if (depth.current() < 100 && value < 10) {
+    return self.apply(value + 1);
+  }
+  return value;
+});
+```
+
+#### `lazy` methods
+
+Returns a value with lazy initialization.
+
+* `lazy(ThSupplier)`
+* `lazy(Object, ThSupplier)`
+* `lazy(Lazy.ThreadSafetyMode, ThSupplier)`
+* `lazyOf(Object)`
+
+```
+Lazy<String> lazyValue1 = lazy(() -> {
+  //...
+  return "abc";
+});
+
+Object externalLock = new Object();
+Lazy<String> lazyValue2 = lazy(externalLock, () -> {
+  //...
+  return "abc";
+});
+
+Lazy<String> lazyValue3 = lazy(ThreadSafetyMode.PUBLICATION, () -> {
+  //...
+  return "abc";
+});
+
+Lazy<String> lazyValue4 = lazyOf("abc");
 ```
 
 ### Unchecked functions
 
-All presented functions allow you to not process checked exceptions.
+All presented functions allow you to not catch any checked exceptions.
 
 ```
 public static void main(String[] args) {
@@ -274,12 +448,12 @@ public static void main(String[] args) {
 #### Collection initialization
 
 ```
-Map<String, Integer> map = let(new HashMap<>(), it -> {
+Map<String, Integer> map = it(new HashMap<>(), it -> {
   it.put("val1", 1);
   it.put("val2", 2);
 });
 
-List<String> list = let(new ArrayList<>(), it -> {
+List<String> list = it(new ArrayList<>(), it -> {
   it.add("val1");
   it.add("val2");
 });
@@ -291,7 +465,7 @@ List<String> list = let(new ArrayList<>(), it -> {
 new MyBuilder()
   .setFirst("first")
   .setSecond("second")
-  .setThird(let(() -> {
+  .setThird(it(() -> {
     //...
     return "third";
   }))
@@ -302,34 +476,11 @@ new MyBuilder()
 #### Nth Fibonacci number
 
 ```
-int value = letIntRec(10, (n, func) -> {
+int value = recur1(10, (n, func) -> {
   if (n <= 1) {
     return 1;
   } else {
     return n * func.apply(n - 1);
   }
-});
-```
-
-#### Method argument processing
-
-```
-public static String checkNonNullNonEmptyStr(String value) {
-  return opt(value)
-    .takeNonNull().throwIfEmpty(NullPointerException::new)
-    .takeUnless(String::isEmpty).throwIfEmpty(IllegalArgumentException::new)
-    .get();
-}
-```
-
-#### Safe resources
-
-```
-class MyResource implements AutoCloseable {
-  //...
-}
-
-withResource(new MyResource(), it -> {
-  //...
 });
 ```

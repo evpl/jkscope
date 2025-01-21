@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Evgenii Plugatar
+ * Copyright 2025 Evgenii Plugatar
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,19 +21,28 @@ package com.plugatar.jkscope.function;
 final class Utils {
 
   /**
-   * Ctor.
+   * Utility class ctor.
    */
   private Utils() {
   }
 
   static void originArgNotNull(final Object origin) {
-    if (origin == null) {
-      throw new NullPointerException("origin arg is null");
-    }
+    if (origin == null) { throw new NullPointerException("origin arg is null"); }
   }
 
-  @SuppressWarnings("unchecked")
-  static <T> T uncheckedCast(final Object obj) {
-    return (T) obj;
+  static void consumerArgNotNull(final Object consumer) {
+    if (consumer == null) { throw new NullPointerException("consumer arg is null"); }
+  }
+
+  static void functionArgNotNull(final Object function) {
+    if (function == null) { throw new NullPointerException("function arg is null"); }
+  }
+
+  static void runnableArgNotNull(final Object runnable) {
+    if (runnable == null) { throw new NullPointerException("runnable arg is null"); }
+  }
+
+  static void supplierArgNotNull(final Object supplier) {
+    if (supplier == null) { throw new NullPointerException("supplier arg is null"); }
   }
 }

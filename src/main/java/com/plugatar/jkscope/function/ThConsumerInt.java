@@ -17,45 +17,47 @@ package com.plugatar.jkscope.function;
 
 import com.plugatar.jkscope.util.Cast;
 
+import static com.plugatar.jkscope.function.Utils.consumerArgNotNull;
 import static com.plugatar.jkscope.function.Utils.originArgNotNull;
-import static com.plugatar.jkscope.function.Utils.runnableArgNotNull;
 
 /**
- * The {@link Runnable} specialization that might throw an exception.
+ * The {@link java.util.function.Consumer} specialization with {@code [int->void]} signature that might throw an
+ * exception.
  *
  * @param <E> the type of the throwing exception
  */
 @FunctionalInterface
-public interface ThRunnable<E extends Throwable> {
+public interface ThConsumerInt<E extends Throwable> {
 
   /**
-   * Performs this operation.
+   * Performs this operation on the given argument.
    *
-   * @throws E if runnable threw exception
+   * @param value the input argument
+   * @throws E if consumer threw exception
    */
-  void run() throws E;
+  void accept(int value) throws E;
 
   /**
-   * Returns given runnable.
+   * Returns given consumer.
    *
-   * @param runnable the runnable
+   * @param consumer the consumer
    * @param <E>      the type of the throwing exception
-   * @return runnable
-   * @throws NullPointerException if {@code runnable} arg is {@code null}
+   * @return consumer
+   * @throws NullPointerException if {@code consumer} arg is {@code null}
    */
-  static <E extends Throwable> ThRunnable<E> of(final ThRunnable<? extends E> runnable) {
-    runnableArgNotNull(runnable);
-    return Cast.unsafe(runnable);
+  static <E extends Throwable> ThConsumerInt<E> of(final ThConsumerInt<? extends E> consumer) {
+    consumerArgNotNull(consumer);
+    return Cast.unsafe(consumer);
   }
 
   /**
-   * Returns given runnable as an unchecked runnable.
+   * Returns given consumer as an unchecked consumer.
    *
-   * @param origin the origin runnable
-   * @return unchecked runnable
+   * @param origin the origin consumer
+   * @return unchecked consumer
    * @throws NullPointerException if {@code origin} arg is {@code null}
    */
-  static ThRunnable<RuntimeException> unchecked(final ThRunnable<?> origin) {
+  static ThConsumerInt<RuntimeException> unchecked(final ThConsumerInt<?> origin) {
     originArgNotNull(origin);
     return Cast.unsafe(origin);
   }

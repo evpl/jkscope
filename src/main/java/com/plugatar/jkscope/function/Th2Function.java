@@ -21,36 +21,39 @@ import static com.plugatar.jkscope.function.Utils.functionArgNotNull;
 import static com.plugatar.jkscope.function.Utils.originArgNotNull;
 
 /**
- * The {@link java.util.function.Function} specialization with {@code [Object->Object]} signature that might throw an
- * exception.
+ * The {@link java.util.function.Function} specialization with {@code [Object,Object->Object]} signature that might
+ * throw an exception.
  *
- * @param <T> the type of the input argument
- * @param <R> the type of the result
- * @param <E> the type of the throwing exception
+ * @param <T1> the type of the first input argument
+ * @param <T2> the type of the second input argument
+ * @param <R>  the type of the result
+ * @param <E>  the type of the throwing exception
  */
 @FunctionalInterface
-public interface ThFunction<T, R, E extends Throwable> {
+public interface Th2Function<T1, T2, R, E extends Throwable> {
 
   /**
-   * Applies this function to the given argument.
+   * Applies this function to the given arguments.
    *
-   * @param t the input argument
+   * @param t1 the first input argument
+   * @param t2 the second input argument
    * @return result
    * @throws E if function threw exception
    */
-  R apply(T t) throws E;
+  R apply(T1 t1, T2 t2) throws E;
 
   /**
    * Returns given function.
    *
    * @param function the function
-   * @param <T>      the type of the input argument
+   * @param <T1>     the type of the first input argument
+   * @param <T2>     the type of the second input argument
    * @param <R>      the type of the result
    * @param <E>      the type of the throwing exception
    * @return function
    * @throws NullPointerException if {@code function} arg is {@code null}
    */
-  static <T, R, E extends Throwable> ThFunction<T, R, RuntimeException> of(final ThFunction<? super T, ? extends R, ? extends E> function) {
+  static <T1, T2, R, E extends Throwable> Th2Function<T1, T2, R, RuntimeException> of(final Th2Function<? super T1, ? super T2, ? extends R, ? extends E> function) {
     functionArgNotNull(function);
     return Cast.unsafe(function);
   }
@@ -59,12 +62,13 @@ public interface ThFunction<T, R, E extends Throwable> {
    * Returns given function as an unchecked function.
    *
    * @param origin the origin function
-   * @param <T>    the type of the input argument
+   * @param <T1>   the type of the first input argument
+   * @param <T2>   the type of the second input argument
    * @param <R>    the type of the result
    * @return unchecked function
    * @throws NullPointerException if {@code origin} arg is {@code null}
    */
-  static <T, R> ThFunction<T, R, RuntimeException> unchecked(final ThFunction<? super T, ? extends R, ?> origin) {
+  static <T1, T2, R> Th2Function<T1, T2, R, RuntimeException> unchecked(final Th2Function<? super T1, ? super T2, ? extends R, ?> origin) {
     originArgNotNull(origin);
     return Cast.unsafe(origin);
   }
