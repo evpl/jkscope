@@ -3075,6 +3075,7 @@ public final class JKScope {
    * @throws NullPointerException if {@code initializer} arg is null
    */
   public static <V> Lazy<V> lazy(final ThSupplier<? extends V, ?> initializer) {
+    initializerArgNotNull(initializer);
     return new SynchronizedLazy<>(initializer);
   }
 
@@ -3099,6 +3100,8 @@ public final class JKScope {
    */
   public static <V> Lazy<V> lazy(final Object lock,
                                  final ThSupplier<? extends V, ?> initializer) {
+    lockArgNotNull(lock);
+    initializerArgNotNull(initializer);
     return new SynchronizedLazy<>(lock, initializer);
   }
 
@@ -3122,6 +3125,7 @@ public final class JKScope {
   public static <V> Lazy<V> lazy(final Lazy.ThreadSafetyMode threadSafetyMode,
                                  final ThSupplier<? extends V, ?> initializer) {
     threadSafetyModeArgNotNull(threadSafetyMode);
+    initializerArgNotNull(initializer);
     switch (threadSafetyMode) {
       case SYNCHRONIZED:
         return new SynchronizedLazy<>(initializer);
@@ -3766,7 +3770,6 @@ public final class JKScope {
     private Object value;
 
     private UnsafeLazy(final ThSupplier<? extends V, ?> initializer) {
-      initializerArgNotNull(initializer);
       this.initializer = initializer;
       this.value = UNINITIALIZED_VALUE;
     }
@@ -3812,7 +3815,6 @@ public final class JKScope {
     private volatile Object value;
 
     private SafePublicationLazy(final ThSupplier<? extends V, ?> initializer) {
-      initializerArgNotNull(initializer);
       this.initializer = initializer;
       this.value = UNINITIALIZED_VALUE;
     }
@@ -3858,7 +3860,6 @@ public final class JKScope {
     private volatile Object value;
 
     private SynchronizedLazy(final ThSupplier<? extends V, ?> initializer) {
-      initializerArgNotNull(initializer);
       this.lock = this;
       this.initializer = initializer;
       this.value = UNINITIALIZED_VALUE;
@@ -3866,8 +3867,6 @@ public final class JKScope {
 
     private SynchronizedLazy(final Object lock,
                              final ThSupplier<? extends V, ?> initializer) {
-      lockArgNotNull(lock);
-      initializerArgNotNull(initializer);
       this.lock = lock;
       this.initializer = initializer;
       this.value = UNINITIALIZED_VALUE;
