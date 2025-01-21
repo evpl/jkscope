@@ -28,6 +28,7 @@ import com.plugatar.jkscope.function.Th6Consumer;
 import com.plugatar.jkscope.function.ThConsumer;
 import com.plugatar.jkscope.function.ThFunction;
 import com.plugatar.jkscope.function.ThRunnable;
+import com.plugatar.jkscope.function.ThSupplier;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -701,5 +702,340 @@ final class RecurMethodsTest {
     assertThat(depths).containsExactly(0, 1, 2, 2, 1, 0);
     assertThat(values).containsExactly(value1, value2, value3, value4, value5, value6, value7, value8, value9);
     assertThat(accs).containsExactly(acc, acc, acc);
+  }
+
+  @Test
+  void recurMethodFunctionNullBlockArg() {
+    final ThFunction<ThSupplier<Object, ?>, Object, ?> block = null;
+
+    assertThatThrownBy(() ->
+      recur(block)
+    ).isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void recurMethodFunction() {
+    final AtomicInteger counter = new AtomicInteger();
+    final Object result = new Object();
+    final ThFunction<ThSupplier<Object, ?>, Object, ?> block = self -> {
+      if (counter.getAndIncrement() < 2) {
+        return self.get();
+      }
+      return result;
+    };
+
+    assertThat(
+      recur(block)
+    ).isSameAs(result);
+    assertThat(counter.get()).isEqualTo(3);
+  }
+
+  @Test
+  void recurMethodFunctionWithDepthNullBlockArg() {
+    final Th2Function<RecurDepth, ThSupplier<Object, ?>, Object, ?> block = null;
+
+    assertThatThrownBy(() ->
+      recur(block)
+    ).isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void recurMethodFunctionWithDepth() {
+    final AtomicInteger counter = new AtomicInteger();
+    final List<Integer> depths = new ArrayList<>();
+    final Object result = new Object();
+    final Th2Function<RecurDepth, ThSupplier<Object, ?>, Object, ?> block = (depth, self) -> {
+      depths.add(depth.current());
+      if (counter.getAndIncrement() < 2) {
+        try {
+          return self.get();
+        } finally {
+          depths.add(depth.current());
+        }
+      }
+      try {
+        return result;
+      } finally {
+        depths.add(depth.current());
+      }
+    };
+
+    assertThat(
+      recur(block)
+    ).isSameAs(result);
+    assertThat(counter.get()).isEqualTo(3);
+    assertThat(depths).containsExactly(0, 1, 2, 2, 1, 0);
+  }
+
+  @Test
+  void recur1MethodFunctionNullBlockArg() {
+    final Object value = new Object();
+    final Th2Function<Object, ? super ThFunction<Object, Object, ?>, Object, ?> block = null;
+
+    assertThatThrownBy(() ->
+      recur1(value, block)
+    ).isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void recur1MethodFunction() {
+    final Object value1 = new Object();
+    final Object value2 = new Object();
+    final Object value3 = new Object();
+    final Object result = new Object();
+    final AtomicInteger counter = new AtomicInteger();
+    final List<Object> values = new ArrayList<>();
+    final Th2Function<Object, ? super ThFunction<Object, Object, ?>, Object, ?> block = (v, self) -> {
+      values.add(v);
+      switch (counter.getAndIncrement()) {
+        case 0:
+          return self.apply(value2);
+        case 1:
+          return self.apply(value3);
+      }
+      return result;
+    };
+
+    assertThat(
+      recur1(value1, block)
+    ).isSameAs(result);
+    assertThat(counter.get()).isEqualTo(3);
+    assertThat(values).containsExactly(value1, value2, value3);
+  }
+
+  @Test
+  void recur1MethodFunctionWithDepthNullBlockArg() {
+    final Object value = new Object();
+    final Th3Function<RecurDepth, Object, ThFunction<Object, Object, ?>, Object, ?> block = null;
+
+    assertThatThrownBy(() ->
+      recur1(value, block)
+    ).isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void recur1MethodFunctionWithDepth() {
+    final Object value1 = new Object();
+    final Object value2 = new Object();
+    final Object value3 = new Object();
+    final Object result = new Object();
+    final AtomicInteger counter = new AtomicInteger();
+    final List<Integer> depths = new ArrayList<>();
+    final List<Object> values = new ArrayList<>();
+    final Th3Function<RecurDepth, Object, ThFunction<Object, Object, ?>, Object, ?> block =
+      (depth, v, self) -> {
+        depths.add(depth.current());
+        values.add(v);
+        try {
+          switch (counter.getAndIncrement()) {
+            case 0:
+              return self.apply(value2);
+            case 1:
+              return self.apply(value3);
+          }
+          return result;
+        } finally {
+          depths.add(depth.current());
+        }
+      };
+
+    assertThat(
+      recur1(value1, block)
+    ).isSameAs(result);
+    assertThat(counter.get()).isEqualTo(3);
+    assertThat(depths).containsExactly(0, 1, 2, 2, 1, 0);
+    assertThat(values).containsExactly(value1, value2, value3);
+  }
+
+  @Test
+  void recur2MethodFunctionNullBlockArg() {
+    final Object value1 = new Object();
+    final Object value2 = new Object();
+    final Th3Function<Object, Object, Th2Function<Object, Object, Object, ?>, Object, ?> block = null;
+
+    assertThatThrownBy(() ->
+      recur2(value1, value2, block)
+    ).isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void recur2MethodFunction() {
+    final Object value1 = new Object();
+    final Object value2 = new Object();
+    final Object value3 = new Object();
+    final Object value4 = new Object();
+    final Object value5 = new Object();
+    final Object value6 = new Object();
+    final Object result = new Object();
+    final AtomicInteger counter = new AtomicInteger();
+    final List<Object> values = new ArrayList<>();
+    final Th3Function<Object, Object, Th2Function<Object, Object, Object, ?>, Object, ?> block = (v1, v2, self) -> {
+      values.add(v1);
+      values.add(v2);
+      switch (counter.getAndIncrement()) {
+        case 0:
+          return self.apply(value3, value4);
+        case 1:
+          return self.apply(value5, value6);
+      }
+      return result;
+    };
+
+    assertThat(
+      recur2(value1, value2, block)
+    ).isSameAs(result);
+    assertThat(counter.get()).isEqualTo(3);
+    assertThat(values).containsExactly(value1, value2, value3, value4, value5, value6);
+  }
+
+  @Test
+  void recur2MethodFunctionWithDepthNullBlockArg() {
+    final Object value1 = new Object();
+    final Object value2 = new Object();
+    final Th4Function<RecurDepth, Object, Object, Th2Function<Object, Object, Object, ?>, Object, ?> block = null;
+
+    assertThatThrownBy(() ->
+      recur2(value1, value2, block)
+    ).isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void recur2MethodFunctionWithDepth() {
+    final Object value1 = new Object();
+    final Object value2 = new Object();
+    final Object value3 = new Object();
+    final Object value4 = new Object();
+    final Object value5 = new Object();
+    final Object value6 = new Object();
+    final Object result = new Object();
+    final AtomicInteger counter = new AtomicInteger();
+    final List<Integer> depths = new ArrayList<>();
+    final List<Object> values = new ArrayList<>();
+    final Th4Function<RecurDepth, Object, Object, Th2Function<Object, Object, Object, ?>, Object, ?> block =
+      (depth, v1, v2, self) -> {
+        depths.add(depth.current());
+        values.add(v1);
+        values.add(v2);
+        try {
+          switch (counter.getAndIncrement()) {
+            case 0:
+              return self.apply(value3, value4);
+            case 1:
+              return self.apply(value5, value6);
+          }
+          return result;
+        } finally {
+          depths.add(depth.current());
+        }
+      };
+
+    assertThat(
+      recur2(value1, value2, block)
+    ).isSameAs(result);
+    assertThat(counter.get()).isEqualTo(3);
+    assertThat(depths).containsExactly(0, 1, 2, 2, 1, 0);
+    assertThat(values).containsExactly(value1, value2, value3, value4, value5, value6);
+  }
+
+  @Test
+  void recur3MethodFunctionNullBlockArg() {
+    final Object value1 = new Object();
+    final Object value2 = new Object();
+    final Object value3 = new Object();
+    final Th4Function<Object, Object, Object, Th3Function<Object, Object, Object, Object, ?>, Object, ?> block = null;
+
+    assertThatThrownBy(() ->
+      recur3(value1, value2, value3, block)
+    ).isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void recur3MethodFunction() {
+    final Object value1 = new Object();
+    final Object value2 = new Object();
+    final Object value3 = new Object();
+    final Object value4 = new Object();
+    final Object value5 = new Object();
+    final Object value6 = new Object();
+    final Object value7 = new Object();
+    final Object value8 = new Object();
+    final Object value9 = new Object();
+    final Object result = new Object();
+    final AtomicInteger counter = new AtomicInteger();
+    final List<Object> values = new ArrayList<>();
+    final Th4Function<Object, Object, Object, Th3Function<Object, Object, Object, Object, ?>, Object, ?> block =
+      (v1, v2, v3, self) -> {
+        values.add(v1);
+        values.add(v2);
+        values.add(v3);
+        switch (counter.getAndIncrement()) {
+          case 0:
+            return self.apply(value4, value5, value6);
+          case 1:
+            return self.apply(value7, value8, value9);
+        }
+        return result;
+      };
+
+    assertThat(
+      recur3(value1, value2, value3, block)
+    ).isSameAs(result);
+    assertThat(counter.get()).isEqualTo(3);
+    assertThat(values).containsExactly(value1, value2, value3, value4, value5, value6, value7, value8, value9);
+  }
+
+  @Test
+  void recur3MethodFunctionWithDepthNullBlockArg() {
+    final Object value1 = new Object();
+    final Object value2 = new Object();
+    final Object value3 = new Object();
+    final Th5Function<RecurDepth, Object, Object, Object, Th3Function<Object, Object, Object, Object, ?>, Object, ?> block =
+      null;
+
+    assertThatThrownBy(() ->
+      recur3(value1, value2, value3, block)
+    ).isInstanceOf(NullPointerException.class);
+  }
+
+  @Test
+  void recur3MethodFunctionWithDepth() {
+    final Object value1 = new Object();
+    final Object value2 = new Object();
+    final Object value3 = new Object();
+    final Object value4 = new Object();
+    final Object value5 = new Object();
+    final Object value6 = new Object();
+    final Object value7 = new Object();
+    final Object value8 = new Object();
+    final Object value9 = new Object();
+    final Object result = new Object();
+    final AtomicInteger counter = new AtomicInteger();
+    final List<Integer> depths = new ArrayList<>();
+    final List<Object> values = new ArrayList<>();
+    final Th5Function<RecurDepth, Object, Object, Object, Th3Function<Object, Object, Object, Object, ?>, Object, ?> block =
+      (depth, v1, v2, v3, self) -> {
+        depths.add(depth.current());
+        values.add(v1);
+        values.add(v2);
+        values.add(v3);
+        try {
+          switch (counter.getAndIncrement()) {
+            case 0:
+              return self.apply(value4, value5, value6);
+            case 1:
+              return self.apply(value7, value8, value9);
+          }
+          return result;
+        } finally {
+          depths.add(depth.current());
+        }
+      };
+
+    assertThat(
+      recur3(value1, value2, value3, block)
+    ).isSameAs(result);
+    assertThat(counter.get()).isEqualTo(3);
+    assertThat(depths).containsExactly(0, 1, 2, 2, 1, 0);
+    assertThat(values).containsExactly(value1, value2, value3, value4, value5, value6, value7, value8, value9);
   }
 }
