@@ -3074,7 +3074,7 @@ public final class JKScope {
    * @return new {@link Lazy} instance
    * @throws NullPointerException if {@code initializer} arg is null
    */
-  static <V> Lazy<V> lazy(final ThSupplier<? extends V, ?> initializer) {
+  public static <V> Lazy<V> lazy(final ThSupplier<? extends V, ?> initializer) {
     return new SynchronizedLazy<>(initializer);
   }
 
@@ -3097,8 +3097,8 @@ public final class JKScope {
    * @return new {@link Lazy} instance
    * @throws NullPointerException if {@code lock} arg is null or {@code initializer} arg is null
    */
-  static <V> Lazy<V> lazy(final Object lock,
-                          final ThSupplier<? extends V, ?> initializer) {
+  public static <V> Lazy<V> lazy(final Object lock,
+                                 final ThSupplier<? extends V, ?> initializer) {
     return new SynchronizedLazy<>(lock, initializer);
   }
 
@@ -3119,8 +3119,8 @@ public final class JKScope {
    * @return new {@link Lazy} instance
    * @throws NullPointerException if {@code threadSafetyMode} arg is null or {@code initializer} arg is null
    */
-  static <V> Lazy<V> lazy(final Lazy.ThreadSafetyMode threadSafetyMode,
-                          final ThSupplier<? extends V, ?> initializer) {
+  public static <V> Lazy<V> lazy(final Lazy.ThreadSafetyMode threadSafetyMode,
+                                 final ThSupplier<? extends V, ?> initializer) {
     threadSafetyModeArgNotNull(threadSafetyMode);
     switch (threadSafetyMode) {
       case SYNCHRONIZED:
@@ -3156,7 +3156,7 @@ public final class JKScope {
    * @param <V>   the type of the value
    * @return new {@link Lazy} instance
    */
-  static <V> Lazy<V> lazyOf(final V value) {
+  public static <V> Lazy<V> lazyOf(final V value) {
     return value == null
       ? Cast.unsafe(InitializedLazyOfNull.INSTANCE)
       : new InitializedLazy<>(value);
