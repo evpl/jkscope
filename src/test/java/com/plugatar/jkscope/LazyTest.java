@@ -19,6 +19,7 @@ import com.plugatar.jkscope.function.ThSupplier;
 import org.junit.jupiter.api.Test;
 
 import static com.plugatar.jkscope.JKScope.lazy;
+import static com.plugatar.jkscope.JKScope.lazyOf;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.doReturn;
@@ -171,5 +172,18 @@ final class LazyTest {
       lazy.get()
     ).isSameAs(result);
     verify(initializer, times(1)).get();
+  }
+
+  @Test
+  void lazyOfMethod() {
+    final Object result = new Object();
+    final Lazy<Object> lazy = lazyOf(result);
+
+    assertThat(
+      lazy.get()
+    ).isSameAs(result);
+    assertThat(
+      lazy.get()
+    ).isSameAs(result);
   }
 }
