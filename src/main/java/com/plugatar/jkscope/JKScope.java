@@ -3449,51 +3449,51 @@ public final class JKScope {
     return mainEx;
   }
 
-  static void blockArgNotNull(final Object block) {
+  private static void blockArgNotNull(final Object block) {
     if (block == null) { throw new NullPointerException("block arg is null"); }
   }
 
-  static void resourceArgNotNull(final Object resource) {
+  private static void resourceArgNotNull(final Object resource) {
     if (resource == null) { throw new NullPointerException("resource arg is null"); }
   }
 
-  static void resource1ArgNotNull(final Object resource1) {
+  private static void resource1ArgNotNull(final Object resource1) {
     if (resource1 == null) { throw new NullPointerException("resource1 arg is null"); }
   }
 
-  static void resource2ArgNotNull(final Object resource2) {
+  private static void resource2ArgNotNull(final Object resource2) {
     if (resource2 == null) { throw new NullPointerException("resource2 arg is null"); }
   }
 
-  static void resource3ArgNotNull(final Object resource3) {
+  private static void resource3ArgNotNull(final Object resource3) {
     if (resource3 == null) { throw new NullPointerException("resource3 arg is null"); }
   }
 
-  static void arrayArgNotNull(final Object array) {
+  private static void arrayArgNotNull(final Object array) {
     if (array == null) { throw new NullPointerException("array arg is null"); }
   }
 
-  static void iterableArgNotNull(final Object iterable) {
+  private static void iterableArgNotNull(final Object iterable) {
     if (iterable == null) { throw new NullPointerException("iterable arg is null"); }
   }
 
-  static void iteratorArgNotNull(final Object iterator) {
+  private static void iteratorArgNotNull(final Object iterator) {
     if (iterator == null) { throw new NullPointerException("iterator arg is null"); }
   }
 
-  static void mapArgNotNull(final Object map) {
+  private static void mapArgNotNull(final Object map) {
     if (map == null) { throw new NullPointerException("map arg is null"); }
   }
 
-  static void initializerArgNotNull(final Object initializer) {
+  private static void initializerArgNotNull(final Object initializer) {
     if (initializer == null) { throw new NullPointerException("initializer arg is null"); }
   }
 
-  static void threadSafetyModeArgNotNull(final Object threadSafetyMode) {
+  private static void threadSafetyModeArgNotNull(final Object threadSafetyMode) {
     if (threadSafetyMode == null) { throw new NullPointerException("threadSafetyMode arg is null"); }
   }
 
-  static void lockArgNotNull(final Object lock) {
+  private static void lockArgNotNull(final Object lock) {
     if (lock == null) { throw new NullPointerException("lock arg is null"); }
   }
 
