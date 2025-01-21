@@ -3134,17 +3134,6 @@ public final class JKScope {
     }
   }
 
-  public static void main(String[] args) {
-    int value = recur1(10, (n, func) -> {
-      if (n <= 1) {
-        return 1;
-      } else {
-        return n * func.apply(n - 1);
-      }
-    });
-    System.out.println(value);
-  }
-
   /**
    * Returns a new {@link Lazy} instance that is already initialized with the specified value.
    *
