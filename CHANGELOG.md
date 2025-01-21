@@ -1,5 +1,17 @@
 # Changelog
 
+## 3.1 (released 21.01.2025)
+
+- changed lazy methods access modifier to public
+- removed unnecessary JKScope.main method
+- added lazyOf methods test
+- added new recur methods tests
+- added null checks for lazy methods args
+
+## 3.0 (released 20.01.2025)
+
+- big refactoring, no backward compatibility
+
 ## 2.3 (released 10.03.2024)
 
 - added `Lazy` object and `JKScope` methods

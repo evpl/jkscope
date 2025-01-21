@@ -32,6 +32,8 @@ Java scope functions inspired by Kotlin
     * [Collection initialization](#collection-initialization)
     * [Argument in a method chain](#argument-in-a-method-chain)
     * [Nth Fibonacci number](#nth-fibonacci-number)
+    * [Get all related exceptions via recursion](#get-all-related-exceptions-via-recursion)
+    * [Get all related exceptions via iteration](#get-all-related-exceptions-via-iteration)
 
 ## Motivation
 
@@ -44,11 +46,10 @@ Java 8+ version required. The library has no dependencies.
 Maven:
 
 ```xml
-
 <dependency>
   <groupId>com.plugatar.jkscope</groupId>
   <artifactId>jkscope</artifactId>
-  <version>3.0</version>
+  <version>3.1</version>
   <scope>compile</scope>
 </dependency>
 ```
@@ -57,7 +58,7 @@ Gradle:
 
 ```groovy
 dependencies {
-  implementation 'com.plugatar.jkscope:jkscope:3.0'
+  implementation 'com.plugatar.jkscope:jkscope:3.1'
 }
 ```
 
@@ -439,7 +440,7 @@ All presented functions allow you to not catch any checked exceptions.
 
 ```
 public static void main(String[] args) {
-  URI uri = let(() -> new URI("abc"));
+  URI uri = it(() -> new URI("abc"));
 }
 ```
 
@@ -476,11 +477,39 @@ new MyBuilder()
 #### Nth Fibonacci number
 
 ```
-int value = recur1(10, (n, func) -> {
+int result = recur1(10, (n, func) -> {
   if (n <= 1) {
     return 1;
   } else {
     return n * func.apply(n - 1);
+  }
+});
+```
+
+#### Get all related exceptions via recursion
+
+```
+Throwable mainException = ...;
+Set<Throwable> allRelated = recur1(mainException, new HashSet<>(), (currentEx, set, self) -> {
+  if (currentEx != null && set.add(currentEx)) {
+    self.accept(currentEx.getCause());
+    for (final Throwable suppressedEx : currentEx.getSuppressed()) {
+      self.accept(suppressedEx);
+    }
+  }
+});
+```
+
+#### Get all related exceptions via iteration
+
+```
+Throwable mainException = ...;
+Set<Throwable> allRelated = iterate1(mainException, new HashSet<>(), (currentEx, set, nextValues) -> {
+  if (currentEx != null && set.add(currentEx)) {
+    nextValues.push(currentEx.getCause());
+    for (final Throwable suppressedEx : currentEx.getSuppressed()) {
+      nextValues.push(suppressedEx);
+    }
   }
 });
 ```
