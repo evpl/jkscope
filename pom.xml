@@ -164,7 +164,7 @@
         <version>3.6.3</version>
         <configuration>
           <source>${java.version}</source>
-          <show>private</show>
+          <show>package</show>
         </configuration>
         <executions>
           <execution>
