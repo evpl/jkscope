@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.1.1 (released 25.01.2025)
+
+- changed maven-javadoc-plugin show parameter to public
+- changed access modifiers for JKScope class null check methods to private
+
 ## 3.1 (released 21.01.2025)
 
 - changed lazy methods access modifier to public
